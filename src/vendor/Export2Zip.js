@@ -13,7 +13,7 @@ export function export_txt_to_zip(th, jsonData, txtName, zipName) {
     tempStr = row.toString()
     txtData += `${tempStr}\r\n`
   })
-  zip.file(`${txt_name}.txt`, txtData)
+  zip.file(`name/${txt_name}.txt`, txtData)
   zip.generateAsync({
     type: "blob"
   }).then((blob) => {
