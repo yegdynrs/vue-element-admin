@@ -21,43 +21,46 @@
   <a href="https://gitter.im/vue-element-admin/discuss">
     <img src="https://badges.gitter.im/Join%20Chat.svg" alt="gitter">
   </a>
-  <a href="https://panjiachen.gitee.io/vue-element-admin-site/zh/donate">
+  <a href="https://panjiachen.github.io/vue-element-admin-site/donate">
     <img src="https://img.shields.io/badge/%24-donate-ff69b4.svg" alt="donate">
   </a>
 </p>
 
-日本語 | [简体中文](./README.md) | [English](./README.en.md)  | [Spanish](./README.es.md)
+English | [简体中文](./README.md) | [日本語](./README.ja.md) | [Spanish](./README.es.md)
 
-## 概要
+## Introduction
 
-[vue-element-admin](https://panjiachen.github.io/vue-element-admin) は管理画面のフロントエンドのインタフェースで、[vue](https://github.com/vuejs/vue) と [element-ui](https://github.com/ElemeFE/element)を使っています。i18nの多言語対応、可変ルート、権限、典型的なビジネスアプリテンプレートであり、豊富なコンポーネントを提供しています。素早くビジネス用の管理画面の現型を構築に役立ちます。
+[vue-element-admin](https://panjiachen.github.io/vue-element-admin) is a production-ready front-end solution for admin interfaces. It is based on [vue](https://github.com/vuejs/vue) and uses the UI Toolkit [element-ui](https://github.com/ElemeFE/element).
 
-- [デモページ](https://panjiachen.github.io/vue-element-admin)
+[vue-element-admin](https://panjiachen.github.io/vue-element-admin) is based on the newest development stack of vue and it has a built-in i18n solution, typical templates for enterprise applications, and lots of awesome features. It helps you build large and complex Single-Page Applications. I believe whatever your needs are, this project will help you.
 
-- [ドキュメント](https://panjiachen.github.io/vue-element-admin-site/)
+- [Preview](https://panjiachen.github.io/vue-element-admin)
+
+- [Documentation](https://panjiachen.github.io/vue-element-admin-site/)
 
 - [Gitter](https://gitter.im/vue-element-admin/discuss)
 
-- [Donate](https://panjiachen.gitee.io/vue-element-admin-site/zh/donate)
+- [Donate](https://panjiachen.github.io/vue-element-admin-site/donate/)
 
 - [Wiki](https://github.com/PanJiaChen/vue-element-admin/wiki)
 
-- おすすめシンプルテンプレート: [vue-admin-template](https://github.com/PanJiaChen/vue-admin-template)
-- デスクトップバージョン: [electron-vue-admin](https://github.com/PanJiaChen/electron-vue-admin)
-- Typescriptバージョン: [vue-typescript-admin-template](https://github.com/Armour/vue-typescript-admin-template) (感謝: [@Armour](https://github.com/Armour))
+- [Gitee](https://panjiachen.gitee.io/vue-element-admin/) 国内用户可访问该地址在线预览
+
+- Base template recommends using: [vue-admin-template](https://github.com/PanJiaChen/vue-admin-template)
+- Desktop: [electron-vue-admin](https://github.com/PanJiaChen/electron-vue-admin)
+- Typescript: [vue-typescript-admin-template](https://github.com/Armour/vue-typescript-admin-template) (Credits: [@Armour](https://github.com/Armour))
 - [awesome-project](https://github.com/PanJiaChen/vue-element-admin/issues/2312)
 
-**バージョン`v4.1.0+`以降について、デフォルトのmasterブランチではi18nをサポートしていません。masterブランチと共にアップデートされる[i18n Branch](https://github.com/PanJiaChen/vue-element-admin/tree/i18n)を使用してください。 **
+**After the `v4.1.0+` version, the default master branch will not support i18n. Please use [i18n Branch](https://github.com/PanJiaChen/vue-element-admin/tree/i18n), it will keep up with the master update**
 
-**現在のバージョン `v4.0+` は `vue-cli` で構築していて、バグ報告は[issue](https://github.com/PanJiaChen/vue-element-admin/issues/new)のissueでお願いします。旧バージョン[tag/3.11.0](https://github.com/PanJiaChen/vue-element-admin/tree/tag/3.11.0)もあります。こちらは`vue-cli`に依存しないです。**
+**The current version is `v4.0+` build on `vue-cli`. If you find a problem, please put [issue](https://github.com/PanJiaChen/vue-element-admin/issues/new). If you want to use the old version , you can switch branch to [tag/3.11.0](https://github.com/PanJiaChen/vue-element-admin/tree/tag/3.11.0), it does not rely on `vue-cli`**
 
-**低いバージョンのブラウザはサーポートしないです(例えば ie)，必要があれば polyfill を追加してください。 [詳細はこちら](https://github.com/PanJiaChen/vue-element-admin/wiki#babel-polyfill)**
+**This project does not support low version browsers (e.g. IE). Please add polyfill by yourself.**
 
-## 前準備
+## Preparation
 
-ローカル環境に [node](http://nodejs.org/) と [git](https://git-scm.com/)のインストールが必要です。[ES2015+](http://es6.ruanyifeng.com/)、[vue](https://cn.vuejs.org/index.html)、[vuex](https://vuex.vuejs.org/zh-cn/)、[vue-router](https://router.vuejs.org/zh-cn/) 、[vue-cli](https://github.com/vuejs/vue-cli) 、[axios](https://github.com/axios/axios) と [element-ui](https://github.com/ElemeFE/element)で開発しています。Requestは[Mock.js](https://github.com/nuysoft/Mock)のモックデータを使っています。
-
-**バグ修正や新規機能追加のissue と pull requestは大歓迎です。**
+You need to install [node](https://nodejs.org/) and [git](https://git-scm.com/) locally. The project is based on [ES2015+](https://es6.ruanyifeng.com/), [vue](https://cn.vuejs.org/index.html), [vuex](https://vuex.vuejs.org/zh-cn/), [vue-router](https://router.vuejs.org/zh-cn/), [vue-cli](https://github.com/vuejs/vue-cli) , [axios](https://github.com/axios/axios) and [element-ui](https://github.com/ElemeFE/element), all request data is simulated using [Mock.js](https://github.com/nuysoft/Mock).
+Understanding and learning this knowledge in advance will greatly help the use of this project.
 
 [![Edit on CodeSandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/PanJiaChen/vue-element-admin/tree/CodeSandbox)
 
@@ -76,71 +79,72 @@ Become a sponsor and get your logo on our README on GitHub with a link to your s
 
 <a href="https://flatlogic.com/admin-dashboards?from=vue-element-admin"><img width="150px" src="https://wpimg.wallstcn.com/9c0b719b-5551-4c1e-b776-63994632d94a.png" /></a><p>Admin Dashboard Templates made with Vue, React and Angular.</p>
 
-## 機能一覧
+## Features
 
 ```
-- ログイン / ログアウト
+- Login / Logout
 
-- Auth認証
-  - ページ権限
-  - 権限パーミッション
-  - 権限設定
-  - 外部IDでログイン
+- Permission Authentication
+  - Page permission
+  - Directive permission
+  - Permission configuration page
+  - Two-step login
 
-- 複数環境デプロイ
-  - dev
+- Multi-environment build
+  - Develop (dev)
   - sit
-  - stage
-  - prod
+  - Stage Test (stage)
+  - Production (prod)
 
-- 共通機能
-  - 多言語切替
-  - テーマ切替
-  - サイトメニュー（ルートから生成）
-  - パンくずリストナビゲーション
-  - タブナビゲーション
-  - Svg Sprite アイコン
-  - ローカル/バックエンド モック データ
+- Global Features
+  - I18n
+  - Multiple dynamic themes
+  - Dynamic sidebar (supports multi-level routing)
+  - Dynamic breadcrumb
+  - Tags-view (Tab page Support right-click operation)
+  - Svg Sprite
+  - Mock data
   - Screenfull
+  - Responsive Sidebar
 
-- WYSIWYG
-  - TinyMCE
-  - Markdown
-  - JSON
+- Editor
+  - Rich Text Editor
+  - Markdown Editor
+  - JSON Editor
 
 - Excel
-  - エクスポート
-  - インポート
-  - リード
-  - Zip
+  - Export Excel
+  - Upload Excel
+  - Visualization Excel
+  - Export zip
 
-- テーブル
-  - ダイナミックテーブル
-  - ドラッグアンドドロップテーブル
-  - インラインエディットテーブル
+- Table
+  - Dynamic Table
+  - Drag And Drop Table
+  - Inline Edit Table
 
-- エラーページ
+- Error Page
   - 401
   - 404
 
-- コンポーネント
-  - アバターアップロード
-  - トップに戻る
-  - ドラッグダイアログ
-  - ドラッグ選択
-  - ドラッグKanban
-  - ドラッグリスト
-  - ペインの分割
+- Components
+  - Avatar Upload
+  - Back To Top
+  - Drag Dialog
+  - Drag Select
+  - Drag Kanban
+  - Drag List
+  - SplitPane
   - Dropzone
-  - スティッキー
+  - Sticky
   - CountTo
 
-- 高度なサンプル
-- エラーログ
-- ダッシュボード
-- ガイドページ
+- Advanced Example
+- Error Log
+- Dashboard
+- Guide Page
 - ECharts
-- クリップボード
+- Clipboard
 - Markdown to html
 ```
 
@@ -160,7 +164,7 @@ npm install
 npm run dev
 ```
 
-http://localhost:9527 が自動的に開きます。
+This will automatically open http://localhost:9527
 
 ## Build
 
@@ -188,11 +192,11 @@ npm run lint
 npm run lint -- --fix
 ```
 
-詳細は [Documentation](https://panjiachen.github.io/vue-element-admin-site/guide/essentials/deploy.html) を参照してください。
+Refer to [Documentation](https://panjiachen.github.io/vue-element-admin-site/guide/essentials/deploy.html) for more information
 
 ## Changelog
 
-各リリースの詳細は [release notes](https://github.com/PanJiaChen/vue-element-admin/releases) にあります。
+Detailed changes for each release are documented in the [release notes](https://github.com/PanJiaChen/vue-element-admin/releases).
 
 ## Online Demo
 
