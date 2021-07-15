@@ -7,12 +7,12 @@ branches:
   only:
     - master # build master branch only
 script:
-  - npm run build:prod # generate static files
+  - npm run build:stage # generate static files
 deploy:
   provider: pages
   skip-cleanup: true
    github_token: $GITHUB_TOKEN
   keep-history: true
-  on:
+  only:
     branch: master
   local-dir: public
