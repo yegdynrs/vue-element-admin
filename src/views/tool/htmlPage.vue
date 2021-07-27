@@ -1,3 +1,7 @@
+<!--
+代码重构思想：
+循环keyList，生成每个keyList的 html，search，table，dialog，详情，script import依赖，data，methods，最后就行一个去重，编辑融合
+-->
 <template>
   <div class="content">
     <template slot="header">页面生成-wanghao</template>
@@ -18,7 +22,12 @@
 
 </pre>
     <el-form ref="form" inline :model="form">
-      <el-table ref="table" :data="form.keyList" style="width: 100%" row-key="rowKey">
+      <el-table
+        ref="table"
+        :data="form.keyList"
+        style="width: 100%"
+        row-key="rowKey"
+      >
         <el-table-column label="字段key" prop="key" min-width="120px">
           <template slot-scope="scope">
             <el-input v-model="scope.row.key" placeholder="key" />
@@ -48,17 +57,31 @@
         </el-table-column>
         <el-table-column label="新增表单" prop="dialog.value" min-width="120px">
           <template slot-scope="scope">
-            <el-checkbox
-              v-model="scope.row.dialog.value"
-            >为dialog</el-checkbox>
+            <el-checkbox v-model="scope.row.dialog.value">为dialog</el-checkbox>
+            <div
+              v-if="
+                (scope.row.type == 'time' ||
+                  scope.row.type == 'money' ||
+                  scope.row.type == 'futureTime') &&
+                  scope.row.dialog.value
+              "
+            >
+              <el-input
+                v-model="scope.row.dialog.combination.key1"
+                placeholder="key1"
+              />
+
+              <el-input
+                v-model="scope.row.dialog.combination.key2"
+                placeholder="key2"
+              />
+            </div>
           </template>
         </el-table-column>
 
         <el-table-column label="table" prop="table.value" min-width="120px">
           <template slot-scope="scope">
-            <el-checkbox
-              v-model="scope.row.table.value"
-            >为table</el-checkbox>
+            <el-checkbox v-model="scope.row.table.value">为table</el-checkbox>
           </template>
         </el-table-column>
 
@@ -97,22 +120,14 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="超出隐藏" prop="tooltip">
-          <template slot-scope="scope">
-            <el-checkbox v-model="scope.row.tooltip" />
-          </template>
-        </el-table-column>
-        <el-table-column label="slot列表" prop="slot.value">
-          <template slot-scope="scope">
-            <div class="flex-center">
-              <el-checkbox v-model="scope.row.slot.value" />
-            </div>
-          </template>
-        </el-table-column>
+
         <el-table-column label="关联List" prop="list.value" width="200px">
           <template slot-scope="scope">
             <div class="flex-center">
-              <el-checkbox v-model="scope.row.list.value" />
+              <el-checkbox
+                v-model="scope.row.list.value"
+                @change="listChange(scope)"
+              />
               <div v-if="scope.row.list.value">
                 <el-input v-model="scope.row.list.name" placeholder="name" />
                 <el-input
@@ -126,9 +141,20 @@
                   :autosize="{ minRows: 2, maxRows: 14 }"
                   placeholder="请输入列表数据"
                 />
-
               </div>
             </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="slot列表" prop="slot.value">
+          <template slot-scope="scope">
+            <div class="flex-center">
+              <el-checkbox v-model="scope.row.slot.value" />
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="超出隐藏" prop="tooltip">
+          <template slot-scope="scope">
+            <el-checkbox v-model="scope.row.tooltip" />
           </template>
         </el-table-column>
 
@@ -143,6 +169,15 @@
       </el-table>
 
       <el-button size="small" class="bt" @click="addList">新增 </el-button>
+
+      <div>
+        <el-button size="small" class="bt" @click="submit">生成页面</el-button>
+        <el-button
+          size="small"
+          class="bt"
+          @click="submitRely"
+        >下载依赖文件</el-button>
+      </div>
       <div>
         <h3>导入数据</h3>
         <pre class="text-left">
@@ -172,11 +207,6 @@ updateTime (string, optional): 最后更新时间
           placeholder="请输入数据模板"
           @input="importFormDataModal"
         />
-      </div>
-      <div>
-        <el-button size="small" class="bt" @click="submit">生成页面</el-button>
-        <el-button size="small" class="bt" @click="submitAdd">增加字段</el-button>
-        <el-button size="small" class="bt" @click="submitRely">下载依赖文件</el-button>
       </div>
       <div>
         <h3>数据模板</h3>
@@ -217,8 +247,13 @@ let defauleJson = {
     value: false
   },
   slot: { value: false }, // 有slot的添加slot-scope
-  dialog: { // 是否是新增，编辑弹窗
-    value: false
+  dialog: {
+    // 是否是新增，编辑弹窗
+    value: false,
+    combination: {
+      key1: '',
+      key2: ''
+    }
   },
   table: {
     value: true
@@ -257,8 +292,9 @@ export default {
         },
         {
           value: 'time',
-          label: '时间'
+          label: '过去时间'
         },
+
         {
           value: 'money',
           label: '数字范围'
@@ -287,6 +323,9 @@ export default {
     })
   },
   methods: {
+    upCase(data) {
+      return data[0].toLocaleUpperCase() + data.substr(1)
+    },
     onEnd({ newIndex, oldIndex }) {
       const old = this.form.keyList[oldIndex]
       this.form.keyList.splice(oldIndex, 1)
@@ -300,7 +339,8 @@ export default {
       a = a[a.length - 1] === ',' ? a : (a += ',')
       a = a.split('\n')
       let str = ''
-      let isNumber = false; let isRadio = false
+      let isNumber = false
+      let isRadio = false
       const json = {}
       const keyList = []
       a.map((item, index) => {
@@ -328,7 +368,8 @@ export default {
               .replace(/[（()）]/gim, '')
               .replace(/[-\s?]/gim, ' ')
               .replace(/[：:\s?]/gim, ' ')
-              .replace(/\s+/gim, ' ').replace(/，/gim, ',')
+              .replace(/\s+/gim, ' ')
+              .replace(/，/gim, ',')
             const list = arr[5].split(',')
             const selectList = []
             list.forEach(item => {
@@ -370,9 +411,11 @@ export default {
     },
     getLabelWidth(value) {
       if (Object.prototype.toString.call(value) === '[object Array]') {
-        return Math.max(...(value.map((item) => {
-          return this.getLabelWidth(item.length)
-        })))
+        return Math.max(
+          ...value.map(item => {
+            return this.getLabelWidth(item.length)
+          })
+        )
       }
       return value * 14 + 12
     },
@@ -402,20 +445,26 @@ export default {
         </el-form-item>
       </el-form>`
     },
-    getSearchLabelWidth() {
-      const obj = this.form.keyList.filter((item) => {
-        return item.search.value
-      }).map((item) => {
-        return item.label
-      })
+    getSearchLabelWidth(data) {
+      const obj =
+        data ||
+        this.form.keyList
+          .filter(item => {
+            return item.search.value
+          })
+          .map(item => {
+            return item.label
+          })
       return this.getLabelWidth(obj)
     },
-    getFormItem() {
-      const data = this.form.keyList.filter((item) => {
-        return item.search.value
-      })
+    getFormItem(data) {
+      const obj =
+        data ||
+        this.form.keyList.filter(item => {
+          return item.search.value
+        })
       let text = ''
-      data.forEach((item, index) => {
+      obj.forEach((item, index) => {
         const fnName = this.getFormItemFn(item.type)
         const json = JSON.parse(JSON.stringify(item))
         text += this[fnName](json, this.form.searchRow) + '\n'
@@ -424,10 +473,14 @@ export default {
     },
     // 搜索框是类似一行，还是多行
     getSearchRow() {
-      return this.form.keyList.filter((item) => { return item.search.value }).length < 6
+      return (
+        this.form.keyList.filter(item => {
+          return item.search.value
+        }).length < 6
+      )
     },
     getFormItemFn(type) {
-      let fn = ''
+      let fn = 'getInputItem'
       switch (type) {
         case 'text':
           fn = 'getInputItem'
@@ -467,7 +520,13 @@ export default {
     ? 'label-width="' + this.getLabelWidth(item.label.length) + 'px"'
     : ''
 }>
-       <NumberRange ref="NRange" :value="[formSearch.${item.search.combination.key1}, formSearch.${item.search.combination.key2}]" @change=";(formSearch.${item.search.combination.key1} = $event[0]), (formSearch.${item.search.combination.key2} = $event[1])" />
+       <NumberRange ref="NRange" :value="[formSearch.${
+  item.search.combination.key1
+}, formSearch.${item.search.combination.key2}]" @change=";(formSearch.${
+  item.search.combination.key1
+} = $event[0]), (formSearch.${
+  item.search.combination.key2
+} = $event[1])" />
       </el-form-item>
       `
     },
@@ -493,9 +552,8 @@ export default {
           <el-option label="全部" value="" />
           <el-option v-for="(item, index) in ${
   item.list.name
-}" :key="'formSearch-${item.list.name}-' + index" :value="item.${
-  item.list.key
-}" :label="item.${item.list.labelKey}" />
+}" :key="'formSearch-${item.list.name}-' + index" :value="item.${item
+  .list.key || 'value'}" :label="item.${item.list.labelKey || 'label'}" />
         </el-select>
       </el-form-item>`
     },
@@ -521,7 +579,9 @@ export default {
       `
     },
     getTableItem() {
-      const data = this.form.keyList.filter((item) => { return item.table.value })
+      const data = this.form.keyList.filter(item => {
+        return item.table.value
+      })
       let text = ''
       data.forEach((item, index) => {
         const fnName = this.getTableItemFn(item.slot)
@@ -531,7 +591,7 @@ export default {
       return text
     },
     getTableItemFn(slot) {
-      let fn = ''
+      let fn = 'getTableTextItem'
       switch (slot.value) {
         case false:
           fn = 'getTableTextItem'
@@ -560,8 +620,10 @@ export default {
         item.minWidth === 'auto' ? 'tableWidth.' + item.key : item.minWidth
       }" ${item.tooltip ? 'show-overflow-tooltip' : ''} >
           <template slot-scope="scope">
-            {{ $utils.find(${item.list.name},scope.row.${item.key},'${item.list
-  .key || item.key}').${item.list.labelKey} || scope.row.${item.key}}}
+            {{ $utils.find(${item.list.name},scope.row.${item.key},"${item.list
+  .key || 'value'}").${item.list.labelKey || 'label'} || scope.row.${
+  item.key
+}}}
           </template>
         </el-table-column>`
     },
@@ -572,29 +634,62 @@ export default {
     },
     getScriptImport() {
       let str = '\n'
-      str += this.form.hasTime
+      const validate = []
+      let tools = []
+      str += this.form.hasSearchTime
         ? `import datePicker from '@/components/TimeInterval/dateRange.vue'
-import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tools'
-`
-        : `import { createColumnWidthWatchFn } from '@/utils/tools'
         `
+        : ``
+      str += this.form.hasDialogTime
+        ? `import datePicker2 from '@/components/TimeInterval/dateRange2.vue'
+        `
+        : ``
+      if (this.form.hasTime && this.form.hasSearchTime) {
+        tools = ['getDateTime', 'longQueryTime']
+      }
+      if (this.form.hasTable) {
+        tools.push('createColumnWidthWatchFn')
+      }
+      str += tools.length > 0 ? `import { ${tools} } from '@/utils/tools'` : ''
       str += this.form.hasMoney
         ? `import NumberRange from '@/components/Range/NumberRange'
         `
         : ''
+      str += this.form.hasAddress
+        ? `import hhCascader from '@/components/hhCascader.vue'
+        import { cityJson as cityJson2 } from '@/utils/cityData.js'
+import { flatToObj } from '@/utils/tools'
+const cityJson = JSON.parse(JSON.stringify(window.cityJson || cityJson2))
+const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名称
+`
+        : ``
+      str += this.form.hasFile
+        ? `import UploadFile from '@/components/hhFileUpload/uploadFileOss'`
+        : ``
+      if (this.form.hasPhone) {
+        validate.push('checkPhone')
+      }
+      if (this.form.hasEnterprise) {
+        validate.push('CheckSocialCreditCode')
+      }
+      if (this.form.hasCertNo) {
+        validate.push('CheckLegalCertNo')
+      }
+      if (this.form.hasBankCardNo) {
+        validate.push('CheckBankCardNo')
+      }
+      if (validate.length > 0) {
+        str += `	import { ${validate} } from '@/utils/validate.js'`
+      }
       return str
     },
+
     getScriptVue() {
       return `
       export default {
         name: 'HtmlPage',
         components: {
-          TablePage,
-          ${this.form.hasTime ? 'datePicker' : ''}${
-  this.form.hasTime && this.form.hasMoney ? ',' : ''
-}
-          ${this.form.hasMoney ? 'NumberRange' : ''}
-          
+          ${this.getScriptVueComponents().join(',\n')}
         },
         props: {},
         data() {
@@ -603,7 +698,9 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
   this.form.hasTime
     ? "longtime: longQueryTime(1, 'year'), // 限制时间"
     : ''
-}${this.getBindList()}
+}${this.getBindList()}${
+  this.form.hasAddress ? 'cnCity: cityJson.data,\n' : ''
+}
             pageIndex: 1,
             pageSize: 10,
             totalSize: 0,
@@ -627,13 +724,17 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
           this._getTableList()
         },
           created() {
-          this.formSearch = JSON.parse(JSON.stringify(this.searchData))
-          this.$watch('tableData', createColumnWidthWatchFn(this.tableWidth))
-          this._getTableList()
+          this.formSearch = JSON.parse(JSON.stringify(this.searchData))${
+  this.form.hasTable
+    ? "\nthis.$watch('tableData', createColumnWidthWatchFn(this.tableWidth));this._getTableList()"
+    : ''
+}
         },
         mounted() {},
         methods: {
-          _getTableList(){
+          ${
+  this.form.hasTable
+    ? ` _getTableList(){
             const data = JSON.parse(JSON.stringify(Object.assign({}, this.searchData, {
                 pageIndex: this.pageIndex,
                 pageSize: this.pageSize
@@ -657,15 +758,7 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
                   this.loading = false;
                 });
           },
-          ${this.form.hasTime ? this.getChangeTimeFn() : ''}
-          onSearch() {
-            for (const i in this.formSearch) {
-              this.searchData[i] = this.formSearch[i]
-            }
-            this.pageIndex = 1
-            this._getTableList()
-          },
-          // 分页
+           // 分页
           currentChange(page) {
             this.pageIndex = page
             this._getTableList()
@@ -674,13 +767,52 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
             this.pageSize = val
             this.pageIndex = 1
             this._getTableList()
+          },`
+    : ''
+}
+          
+          ${this.form.hasTime ? this.getChangeTimeFn() : ''}
+          ${
+  this.form.hasForm
+    ? `
+          onSearch() {
+            for (const i in this.formSearch) {
+              this.searchData[i] = this.formSearch[i]
+            }
+            this.pageIndex = 1
+            this._getTableList()
           },
+          `
+    : ''
+}
           ${this.form.hasDialog ? this.getDialogMethods() : ''}
           ${this.getDetailMethods()}
         }
            
       }
     `
+    },
+    getScriptVueComponents() {
+      const componentsArr = []
+      if (this.form.hasTable) {
+        componentsArr.push('TablePage')
+      }
+      if (this.form.hasSearchTime) {
+        componentsArr.push('datePicker')
+      }
+      if (this.form.hasDialogTime) {
+        componentsArr.push('datePicker2')
+      }
+      if (this.form.hasMoney) {
+        componentsArr.push('NumberRange')
+      }
+      if (this.form.hasAddress) {
+        componentsArr.push('hhCascader')
+      }
+      if (this.form.hasFile) {
+        componentsArr.push('UploadFile')
+      }
+      return [...new Set([componentsArr])]
     },
     getBindList() {
       let str = ''
@@ -698,11 +830,16 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
     },
     getTableWidth() {
       let str = ''
-      this.form.keyList.filter((item) => { return item.table.value }).forEach(item => {
-        if (item.minWidth === 'auto') {
-          str += `${item.key}: ${this.getLabelWidth(item.label.length) + 10},`
-        }
-      })
+      this.form.keyList
+        .filter(item => {
+          return item.table.value
+        })
+        .forEach(item => {
+          if (item.minWidth === 'auto') {
+            str += `${item.key}: ${this.getLabelWidth(item.label.length) +
+              10},`
+          }
+        })
       return str + '\n'
     },
     getChangeTimeFn() {
@@ -727,22 +864,73 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
         type: 'add',
         title: '新增'
       },
+      ${this.getDialogVueDataTool()}
+      `
+    },
+    getDialogVueDataTool() {
+      return `${
+        this.form.hasDialogTime
+          ? '\ndateOptions:{disabledDate(time) {const today = new Date();today.setHours(0, 0, 0, 0);return time.getTime() < today.getTime()}},'
+          : ''
+      }
       formDetail: {
         ${this.getDialogVueDataForm()}
       },
       formDetailRules: {
         ${this.getDialogVueDataRules()}
-      },
-      `
+      },`
     },
     // 获取dialog的vue的data中的formDetail
     getDialogVueDataForm() {
-      const data = this.form.keyList.filter((item) => {
+      const data = this.form.keyList.filter(item => {
         return item.dialog.value
       })
       let text = ''
       data.forEach((item, index) => {
-        text += `${item.key}:${item.type === 'radio' ? this.getRadioDefault(item) : "''"}, // ${item.label}` + '\n'
+        switch (item.type) {
+          case 'radio':
+            text += `
+            ${item.key}:${this.getRadioDefault(item)},`
+            break
+          case 'time':
+            if (
+              item.dialog.combination &&
+              item.dialog.combination.key1 &&
+              item.dialog.combination.key2
+            ) {
+              text += `
+              ${item.dialog.combination.key1}:'',
+              ${item.dialog.combination.key2}:'',
+              `
+            } else {
+              text += `
+              ${item.key}:'', // ${item.label}`
+            }
+            break
+          case 'money':
+            if (
+              item.dialog.combination &&
+              item.dialog.combination.key1 &&
+              item.dialog.combination.key2
+            ) {
+              text += `
+              ${item.dialog.combination.key1}:'',
+              ${item.dialog.combination.key2}:'',
+              `
+            } else {
+              text += `
+              ${item.key}:'', // ${item.label}`
+            }
+            break
+          case 'address':
+            text += `
+            ${item.key}:[],// code数组，如果需要具体name，请使用cityObj[code]获取`
+            break
+          default:
+            text += `
+            ${item.key}:'', // ${item.label}`
+            break
+        }
       })
       return text
     },
@@ -752,8 +940,8 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
         try {
           const data = JSON.parse(item.list.data)
           let res = data[0][item.list.key]
-          res = (res === undefined ? '' : res)
-          res = (typeof res === 'number') ? res : `'${res}'`
+          res = res === undefined ? '' : res
+          res = typeof res === 'number' ? res : `'${res}'`
           return res
         } catch (error) {
           console.log(error)
@@ -763,24 +951,90 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
     },
     // 获取dialog的vue的data中的formDetail的校验
     getDialogVueDataRules() {
-      const data = this.form.keyList.filter((item) => {
+      const data = this.form.keyList.filter(item => {
         return item.dialog.value
       })
       let text = ''
       data.forEach((item, index) => {
-        text += `${item.key}: [{
-          required: true,
-          message: '请${item.type === 'select' ? '选择' : '输入'}${item.label}',
-          trigger: 'change'
-        }],` + '\n'
+        switch (item.type) {
+          case 'phone':
+            text += `
+            ${item.key}: [{
+            required: true,
+            message: '请输入${item.label}',
+            trigger: 'blur'
+          },{
+              required: true,
+              trigger: 'blur',
+              validator: checkPhone,
+            }],`
+            break
+          case 'enterprise':
+            text += `
+            ${item.key}: [{
+            required: true,
+            message: '请输入${item.label}',
+            trigger: 'blur'
+          },{
+              required: true,
+              trigger: 'blur',
+              validator: CheckSocialCreditCode,
+            }],`
+            break
+          case 'certNo':
+            text += `
+            ${item.key}: [{
+            required: true,
+            message: '请输入${item.label}',
+            trigger: 'blur'
+          },{
+              required: true,
+              trigger: 'blur',
+              validator: CheckLegalCertNo,
+            }],`
+            break
+          case 'bankCardNo':
+            text += `
+            ${item.key}: [{
+            required: true,
+            message: '请输入${item.label}',
+            trigger: 'blur'
+          },{
+              required: true,
+              trigger: 'blur',
+              validator: CheckBankCardNo,
+            }],`
+            break
+          case 'address':
+            text +=
+              `${item.key}: [{
+              required: true,
+              message: '请选择${item.label}',
+              trigger: 'change',
+              type: 'array'
+            }],` + '\n'
+
+            break
+          default:
+            text +=
+              `${item.key}: [{
+              required: true,
+              message: '请${item.type === 'select' ? '选择' : '输入'}${
+  item.label
+}',
+              trigger: '${item.type === 'select' ? 'change' : 'blur'}'
+            }],` + '\n'
+            break
+        }
       })
       return text
     },
     getDialogMethods() {
-      return `handleAdd(){
+      const text = `handleAdd(){
           this.formDetailJson.type = 'add'
           this.formDetailJson.title = '新增'
-          this.formDetail= {${this.getDialogVueDataForm()}}
+          this.formDetail= {${this.getDialogVueDataForm()}
+          }
           if (this.$refs.formDetail) this.$refs.formDetail.resetFields()
           this.formDetailDialog = true
       },
@@ -791,7 +1045,6 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
           this.formDetailDialog = true
       },
       dialogSubmitForm(formName){
-        
       this.$refs[formName].validate((valid) => {
         if (valid) {
           const data = Object.assign({}, this.formDetail)
@@ -825,7 +1078,28 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
         }
       })
       },
+      ${this.getDialogMethodsTool()}
       `
+      return text
+    },
+    getDialogMethodsTool() {
+      let text = ''
+      const data = this.form.keyList.filter(item => {
+        return item.dialog
+      })
+      data.forEach((item, index) => {
+        if (
+          item.type == 'time' &&
+          item.dialog.combination.key1 &&
+          item.dialog.combination.key2
+        ) {
+          text += `changeTimeFormDetail${item.dialog.combination.key1}(val){
+            this.formDetail.${item.dialog.combination.key1} = val[0]
+            this.formDetail.${item.dialog.combination.key2} = val[1]
+          },`
+        }
+      })
+      return text
     },
     getDetailVueData() {
       return `dialogVisible: false,
@@ -845,17 +1119,19 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
     },
     getScriptVueSearchData() {
       let text = ''
-      this.form.keyList.filter((item) => {
-        return item.search.value
-      }).forEach((item, index) => {
-        const fnName = this.getScriptVueSearchDataFn(item.type)
-        const json = JSON.parse(JSON.stringify(item))
-        text += this[fnName](json) + '\n'
-      })
+      this.form.keyList
+        .filter(item => {
+          return item.search.value
+        })
+        .forEach((item, index) => {
+          const fnName = this.getScriptVueSearchDataFn(item.type)
+          const json = JSON.parse(JSON.stringify(item))
+          text += this[fnName](json) + '\n'
+        })
       return text
     },
     getScriptVueSearchDataFn(type) {
-      let fn = ''
+      let fn = 'getVueSearchDataText'
       switch (type) {
         case 'time':
           fn = 'getVueSearchDataTime'
@@ -870,7 +1146,8 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
       return fn
     },
     getVueSearchDataText(item) {
-      return `${item.search.key || item.key}:'', // ${item.search.label || item.label}`
+      return `${item.search.key || item.key}:'', // ${item.search.label ||
+        item.label}`
     },
     getVueSearchDataTime(item) {
       return `${item.search.combination.key1 ||
@@ -898,8 +1175,16 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
           }
       }
       ${this.form.hasMoney ? '.range-box>.el-input{width: 109px;}' : ''}
-      ${this.form.hasSelect ? '.search-box {.el-select {min-width: 230px;width: auto;.el-input { min-width: 230px;width: auto;}.el-select__tags{overflow: hidden;}}}' : ''}
-        ${this.form.hasTime ? '.time-box{.el-date-editor.el-input .el-input__inner{padding-left: 10px;}}' : ''}
+      ${
+  this.form.hasSelect
+    ? '.search-box {.el-select {min-width: 230px;width: auto;.el-input { min-width: 230px;width: auto;}.el-select__tags{overflow: hidden;}}}'
+    : ''
+}
+        ${
+  this.form.hasTime
+    ? '.time-box{.el-date-editor.el-input .el-input__inner{padding-left: 10px;}}'
+    : ''
+}
       }
       .w-100 {
         width: 100% !important;
@@ -910,20 +1195,21 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
       if (!this.form.hasDialog) {
         return ''
       }
-      const row = this.form.keyList.filter((item) => {
-        return item.dialog.value
-      }).length > 6
+      const row =
+        this.form.keyList.filter(item => {
+          return item.dialog.value
+        }).length > 6
       return `
       <!--新增/修改-->
-      <Dialog :title="formDetailJson.title" :visible.sync="formDetailDialog" width="${row ? 60 : 30}%" 
+      <Dialog :title="formDetailJson.title" :visible.sync="formDetailDialog" width="${
+  row ? 60 : 30
+}%" 
       ${row ? 'custom-class="form-dialog-row"' : ''}
       :modal-append-to-body="false"
       :append-to-body="true"
       :close-on-click-modal="false">
        <template>
-        <el-form ref="formDetail" :model="formDetail" :rules="formDetailRules" label-width="${this.getDialogLabelWidth() + 10}px" class="form-dialog-box">
-        ${this.getDialogFormItem()}
-        </el-form>
+       ${this.getDialogForm()}
       </template>
       <template slot="footer">
         <el-button size="small" @click="formDetailDialog = false">取消</el-button>
@@ -932,16 +1218,24 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
       </Dialog>
       `
     },
+    getDialogForm() {
+      return `<el-form ref="formDetail" :model="formDetail" :rules="formDetailRules" label-width="${this.getDialogLabelWidth() +
+        10}px" class="form-box">
+        ${this.getDialogFormItem()}
+        </el-form>`
+    },
     getDialogLabelWidth() {
-      const obj = this.form.keyList.filter((item) => {
-        return item.dialog.value
-      }).map((item) => {
-        return item.label
-      })
+      const obj = this.form.keyList
+        .filter(item => {
+          return item.dialog.value
+        })
+        .map(item => {
+          return item.label
+        })
       return this.getLabelWidth(obj)
     },
     getDialogFormItem() {
-      const data = this.form.keyList.filter((item) => {
+      const data = this.form.keyList.filter(item => {
         return item.dialog.value
       })
       let text = ''
@@ -953,7 +1247,7 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
       return text
     },
     getDiaLogFormItemFn(type) {
-      let fn = ''
+      let fn = 'getDialogInputItem'
       switch (type) {
         case 'text':
           fn = 'getDialogInputItem'
@@ -964,11 +1258,29 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
         case 'radio':
           fn = 'getDialogRadiotem'
           break
-        case 'time':
+        case 'futureTime':
           fn = 'getDialogTimeItem'
           break
         case 'money':
           fn = 'getDialogMoneyItem'
+          break
+        case 'file':
+          fn = 'getDialogFile'
+          break
+        case 'address':
+          fn = 'getDialogAddress'
+          break
+        case 'phone':
+          fn = 'getDialogPhone'
+          break
+        case 'enterprise':
+          fn = 'getDialogEnterprise'
+          break
+        case 'certNo ':
+          fn = 'getDialogInputItem'
+          break
+        case 'bankCardNo':
+          fn = 'getDialogInputItem'
           break
         default:
           break
@@ -986,9 +1298,12 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
     getDialogSelectItem(item) {
       return `
           <el-form-item label="${item.label}" prop="${item.key}">
-            <el-select v-model="formDetail.${item.key}" clearable filterable placeholder="请选择${item.label}">
+            <el-select v-model="formDetail.${
+  item.key
+}" clearable filterable placeholder="请选择${item.label}">
               <template v-for="(item,index) in ${item.list.name}">
-                <el-option :key="'item.${item.list.key || item.key}'+index" :label="item.${item.list.labelKey}" :value="item.${item.list.key || item.key}" />
+                <el-option :key="'${item.key}List'+index" :label="item.${item
+  .list.labelKey || 'label'}" :value="item.${item.list.key || 'value'}" />
               </template>
             </el-select>
           </el-form-item>`
@@ -997,17 +1312,76 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
       return `
       <el-form-item label="${item.label}" prop="${item.key}">
       <el-radio-group v-model="formDetail.${item.key}">
-          <el-radio :label="item.${item.list.key}" v-for="(item,index) in ${item.list.name}" :key="'${item.key}'+index">{{item.${item.list.labelKey}}}</el-radio>
+          <el-radio :label="item.${item.list.key}" v-for="(item,index) in ${
+  item.list.name
+}" :key="'${item.key}List'+index">{{item.${item.list.labelKey ||
+        'label'}}}</el-radio>
         </el-radio-group>
        </el-form-item>`
     },
-    // 获取dialog的时间选择，后期扩展
-    getDialogTimeItem() {
+    // 获取dialog的时间选择
+    getDialogTimeItem(item) {
+      // 为一个组合
+      if (
+        item.dialog.combination &&
+        item.dialog.combination.key1 &&
+        item.dialog.combination.key2
+      ) {
+        return `
+          <el-form-item label="${item.label}"  class="is-required">
+            <datePicker2 :default-time="[formDetail.${item.dialog.combination.key1}, formDetail.${item.dialog.combination.key2}]" :picker-options="dateOptions" is-auto-add-time @change-time="changeTimeFormDetail${item.dialog.combination.key1}" />
+          </el-form-item>`
+      } else {
+        return `
+         <el-form-item label="${item.label}" prop="${item.key}">
+            <el-date-picker
+              v-model="formDetail.${item.key}"
+              type="date"
+              format="yyyy-MM-dd"
+              value-format="yyyy-MM-dd"
+              :picker-options="dateOptions"
+              placeholder="日期选择"
+              style="width: 100%"
+              placement="bottom-start"
+            />
+         </el-form-item>`
+      }
+    },
+    // 获取dialog的金钱选择
+    getDialogMoneyItem(item) {
+      return `<el-form-item label="${item.label}"  prop="${item.key}">
+       <NumberRange ref="NRangeForm" :value="[formDetail.${item.dialog.combination.key1}, formDetail.${item.dialog.combination.key2}]" @change=";(formDetail.${item.dialog.combination.key1} = $event[0]), (formDetail.${item.dialog.combination.key2} = $event[1])" />
+      </el-form-item>`
+    },
+    // 文件上传
+    getDialogFile() {
       return ''
     },
-    // 获取dialog的金钱选择，后期扩展
-    getDialogMoneyItem() {
-      return ''
+    // 地址选择器
+    getDialogAddress(item) {
+      return `
+        <el-form-item label="${item.label}"  prop="${item.key}">
+          <hhCascader
+              v-model="formDetail.${item.key}"
+              :options="cnCity"
+              clearable
+              style="display: block"
+            />
+        </el-form-item>`
+    },
+    // 手机
+    getDialogPhone(item) {
+      return `
+          <el-form-item label="${item.label}" prop="${item.key}">
+            <el-input v-model.trim="formDetail.${item.key}" type="text" maxlength="11" placeholder="请输入${item.label}" clearable />
+          </el-form-item>`
+    },
+    // 企业社会信用代码
+    getDialogEnterprise(item) {
+      return `
+          <el-form-item label="${item.label}" prop="${item.key}">
+            <el-input v-model.trim="formDetail.${item.key}" type="text" maxlength="18" placeholder="请输入${item.label}" clearable />
+          </el-form-item>`
     },
     // 获取详情的view
     getDetail() {
@@ -1022,7 +1396,8 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
       :append-to-body="true"
       :close-on-click-modal="false"
     >
-      <el-form :model="orderDetails" label-width="${this.getDetailLabelWidth() + 12}px">
+      <el-form :model="orderDetails" label-width="${this.getDetailLabelWidth() +
+        12}px">
           ${this.getDetailItem()}
       </el-form>
       <div slot="footer" class="dialog-footer" align="center">
@@ -1032,7 +1407,7 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
       `
     },
     getDetailLabelWidth() {
-      const obj = this.form.keyList.map((item) => {
+      const obj = this.form.keyList.map(item => {
         return item.label
       })
       return this.getLabelWidth(obj)
@@ -1040,22 +1415,28 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
     getDetailItem() {
       let text = ''
       this.form.keyList.forEach((item, index) => {
-        const w100 = index === (this.form.keyList.length - 1) && ((index + 1) % 2 === 1)
-        text += ((item.type === 'select' || item.type === 'radio') && item.slot.value) ? `
+        const w100 =
+          index === this.form.keyList.length - 1 && (index + 1) % 2 === 1
+        text +=
+          (item.type === 'select' || item.type === 'radio') && item.slot.value
+            ? `
          <div class="grid-content ${w100 ? 'w-100' : ''}">
           <el-form-item label="${item.label}:">
             <div>
                 <span>{{
                 (
                   ${item.list.name}.find(
-                    item => item.${item.list.key} == orderDetails.${item.list.key}
+                    item => item.${item.list.key ||
+                      'value'} == orderDetails.${item.list.key || item.key}
                   ) || {}
-                ).${item.list.labelKey} || orderDetails.${item.list.key}
+                ).${item.list.labelKey || 'label'} || orderDetails.${item.list
+  .key || item.key}
               }}</span>
             </div>
           </el-form-item>
         </div>
-         ` : `
+         `
+            : `
           <div class="grid-content ${w100 ? 'w-100' : ''}">
           <el-form-item label="${item.label}:">
             <div> {{ orderDetails.${item.key} }}</div>
@@ -1067,11 +1448,13 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
     },
     textInit() {
       let hasTime = false
+      let hasSearchTime = false
       let hasMoney = false
       let hasForm = false
       let hasDialog = false
       let hasSelect = false
       let hasTable = false
+      const hasPhone = false
       this.form.keyList.forEach(item => {
         if (item.search.value) {
           hasForm = true
@@ -1081,7 +1464,11 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
         }
         if (item.type === 'time') {
           hasTime = true
+          if (item.search.value) {
+            hasSearchTime = true
+          }
         }
+
         if (item.type === 'money') {
           hasMoney = true
         }
@@ -1098,66 +1485,13 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
       this.form.hasDialog = hasDialog
       this.form.hasSelect = hasSelect
       this.form.hasTable = hasTable
+      this.form.hasPhone = hasPhone
+
+      this.form.hasSearchTime = hasSearchTime
+
       this.form.searchRow = this.getSearchRow()
     },
-    // 增添数据
-    submitAdd() {
-      this.textInit()
-      const text = `
-      <template>
-      <div>
-      表单html新增：
-      ${this.getFormItem()}
 
-      表单table新增：
-      ${this.getTableItem()}
-
-      dialog新增：
-      ${this.getDialogFormItem()}
-
-      dialog详情：
-      ${this.getDetailItem()}
-    </div>
-</template>
-<script>
- ${this.getScriptImport()}
-      export default {
-        name: 'HtmlPage',
-        components: {
-          ${this.form.hasTime ? 'datePicker' : ''}${
-  this.form.hasTime && this.form.hasMoney ? ',' : ''
-}
-          ${this.form.hasMoney ? 'NumberRange' : ''}
-        },
-         data() {
-          return {
-            ${
-  this.form.hasTime
-    ? "longtime: longQueryTime(1, 'year'), // 限制时间"
-    : ''
-}${this.getBindList()}
-            tableWidth: {
-              ${this.getTableWidth()}
-            },
-            searchData: {
-              ${this.getScriptVueSearchData()}
-            },
-            formDetail: {
-              ${this.getDialogVueDataForm()}
-            },
-            formDetailRules: {
-              ${this.getDialogVueDataRules()}
-            },
-          }
-        },
-        methods:{
-          ${this.form.hasTime ? this.getChangeTimeFn() : ''}
-          ${this.form.hasDialog ? ('handleAdd(){this.formDetail= {' + this.getDialogVueDataForm() + '}}') : ''}
-        }
-        <\/script>
-      `
-      exportFile(text, 'add.vue')
-    },
     // 生成页面
     submit() {
       this.textInit()
@@ -1177,17 +1511,27 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
     // 生成依赖
     submitRely() {
       this.$refs.rely.click()
+    },
+    listChange(scope) {
+      if (scope.row.list.value) {
+        scope.row.list.key = 'value'
+        scope.row.list.labelKey = 'label'
+        scope.row.list.name = scope.row.key && scope.row.key + 'List'
+      } else {
+        scope.row.list.key = ''
+        scope.row.list.labelKey = ''
+        scope.row.list.name = ''
+      }
     }
-
   }
 }
 </script>
 <style lang="scss" scoped>
-.content{
-    padding: 0 20px;
-    margin-bottom: 40px;
-    font: 13px/21px Arial,sans-serif;
-    color: #333;
+.content {
+  padding: 0 20px;
+  margin-bottom: 40px;
+  font: 13px/21px Arial, sans-serif;
+  color: #333;
 }
 .form-item {
   display: flex;
@@ -1205,11 +1549,14 @@ import { getDateTime,longQueryTime,createColumnWidthWatchFn } from '@/utils/tool
     width: 100px;
     margin: 20px 0;
   }
+  .bt + .bt {
+    margin-left: 20px;
+  }
 }
-.text-left{
-    text-align: left;
+.text-left {
+  text-align: left;
 }
-.d-none{
-    display: none;
+.d-none {
+  display: none;
 }
 </style>
