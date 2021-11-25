@@ -1037,7 +1037,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
       handleEdit(row){
         this.formDetailJson.type = 'edit'
         this.formDetailJson.title = '修改'
-          this.formDetail = Object.assign({}, row)
+          this.formDetail = JSON.parse(JSON.stringify(row))
           this.formDetailDialog = true
           if (this.$refs.formDetail) this.$refs.formDetail.clearValidate()
       },
