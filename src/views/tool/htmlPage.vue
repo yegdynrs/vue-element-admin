@@ -1186,7 +1186,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
         }).length > 6
       return `
       <!--新增/修改-->
-      <Dialog :title="formDetailJson.title" :visible.sync="formDetailDialog" width="${
+      <Dialog :title="formDetailJson.title" :to-body="false"  custom-class="seal-dialog" :visible.sync="formDetailDialog" width="${
   row ? 60 : 30
 }%" 
       ${row ? 'custom-class="form-dialog-row"' : ''}
