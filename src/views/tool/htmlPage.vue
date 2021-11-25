@@ -424,23 +424,23 @@ export default {
         return ''
       }
 
-      if (!this.form.searchRow) {
-        return `
-         <el-form ref="formSearch" :inline="true" :model="formSearch" label-width="${this.getSearchLabelWidth()}px" size="small" class="search-box">
-       <el-row type="flex" align="middle">
-        <el-col :lg="19" :md="12">
-      ${this.getFormItem()}
-      </el-col>
-         <el-col :lg="5" :md="12" class="search-box-right">
-          <el-button type="primary" size="small" @click="onSearch">搜 索</el-button>
-        </el-col>
-      </el-row>
-       </el-form>
-        `
-      }
+      // if (!this.form.searchRow) {
+      //   return `
+      //    <el-form ref="formSearch" :inline="true" :model="formSearch" label-width="${this.getSearchLabelWidth()}px" size="small" class="search-box">
+      //  <el-row type="flex" align="middle">
+      //   <el-col :lg="19" :md="12">
+      // ${this.getFormItem()}
+      // </el-col>
+      //    <el-col :lg="5" :md="12" class="search-box-right">
+      //     <el-button type="primary" size="small" @click="onSearch">搜 索</el-button>
+      //   </el-col>
+      // </el-row>
+      //  </el-form>
+      //   `
+      // }
 
       return `
-      <el-form ref="formSearch" :inline="true" :model="formSearch"  size="small" class="search-box">
+      <el-form ref="formSearch" :inline="true" :model="formSearch" ${this.form.searchRow ? '' : `label-width="${this.getSearchLabelWidth()}px"`}  size="small" class="search-box">
       ${this.getFormItem()}
       <el-form-item label-width="">
           <el-button type="primary" size="small" @click="onSearch">搜 索</el-button>
