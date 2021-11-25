@@ -377,7 +377,7 @@ export default {
               if (arr[1] !== undefined && arr[0] !== undefined) {
                 selectList.push({
                   label: arr[1],
-                  value: isNumber ? Number(arr[0]) : arr[0]
+                  value: (isNumber ? Number(arr[0]) : isRadio ? Boolean(arr[0]) : arr[0])
                 })
               }
             })
@@ -423,6 +423,7 @@ export default {
       if (!this.form.hasForm) {
         return ''
       }
+
       if (!this.form.searchRow) {
         return `
          <el-form ref="formSearch" :inline="true" :model="formSearch" label-width="${this.getSearchLabelWidth()}px" size="small" class="search-box">
@@ -437,8 +438,9 @@ export default {
        </el-form>
         `
       }
+
       return `
-      <el-form ref="formSearch" :inline="true" :model="formSearch" label-width="70px" size="small" class="search-box">
+      <el-form ref="formSearch" :inline="true" :model="formSearch"  size="small" class="search-box">
       ${this.getFormItem()}
       <el-form-item label-width="">
           <el-button type="primary" size="small" @click="onSearch">搜 索</el-button>
@@ -503,11 +505,7 @@ export default {
       return fn
     },
     getInputItem(item, row = true) {
-      return `<el-form-item label="${item.label}"  ${
-        row && item.label.length > 4
-          ? 'label-width="' + this.getLabelWidth(item.label.length) + 'px"'
-          : ''
-      }>
+      return `<el-form-item label="${item.label}">
       <el-input v-model.trim="formSearch.${item.key}" placeholder="请输入${
   item.label
 }" clearable />
@@ -515,11 +513,7 @@ export default {
     },
     getMoneyItem(item, row = true) {
       return `
-      <el-form-item label="${item.label}" ${
-  row && item.label.length > 4
-    ? 'label-width="' + this.getLabelWidth(item.label.length) + 'px"'
-    : ''
-}>
+      <el-form-item label="${item.label}">
        <NumberRange ref="NRange" :value="[formSearch.${
   item.search.combination.key1
 }, formSearch.${item.search.combination.key2}]" @change=";(formSearch.${
@@ -533,7 +527,7 @@ export default {
     getTimeItem(item) {
       return `
        <el-form-item label="${item.label}">
-        <datePicker islimitlength :longtime="longtime" :default-time="[formSearch.${item.search.combination.key1}, formSearch.${item.search.combination.key2}]" is-auto-add-time @change-time="changeTime" />
+        <datePicker :longtime="longtime" :default-time="[formSearch.${item.search.combination.key1}, formSearch.${item.search.combination.key2}]" is-auto-add-time @change-time="changeTime" />
       </el-form-item>
       `
     },
@@ -541,12 +535,8 @@ export default {
       return this.getSelectItem(item)
     },
     getSelectItem(item, row = true) {
-      return `<el-form-item label="${item.label}"  ${
-        row && item.label.length > 4
-          ? 'label-width="' + this.getLabelWidth(item.label.length) + 'px"'
-          : ''
-      }>
-        <el-select v-model.trim="formSearch.${item.key}" placeholder="请输入${
+      return `<el-form-item label="${item.label}">
+        <el-select v-model.trim="formSearch.${item.key}" placeholder="请选择${
   item.label
 }">
           <el-option label="全部" value="" />
@@ -558,20 +548,22 @@ export default {
       </el-form-item>`
     },
     getTable() {
-      if (!this.form.hasForm) return ''
+      if (!this.form.hasTable) return ''
       return `
-       <table-page :table-data="tableData" :show-pagination="true" :current-page="pageIndex"  :total-page="totalSize" :isload="loading" :page-size="pageSize" @changPage="currentChange" @sizeChange="handleSizeChange">
-           <div slot="button_box" class="button-box">
+       <table-page :table-data="tableData" :show-pagination="true" :current-page="pageIndex"  :total-page="totalSize" :page-size="pageSize" @changPage="currentChange" @sizeChange="handleSizeChange">
+           ${this.form.hasDialog ? `<div slot="button_box" class="button-box">
         <el-button type="primary" size="small" @click="handleAdd">新 增</el-button>
-      </div>
+      </div>` : ``}
+          
 
       <template slot="table_column">
       <el-table-column type="index" label="序号" width="60" align="center" />
       ${this.getTableItem()}
-      <el-table-column label="操作" width="100px" align="center" fixed="right">
+      <el-table-column label="操作" :width="operationWidth" align="center" fixed="right" v-if="operationWidth">
           <template slot-scope="scope">
             <el-button size="mini" type="text" @click="handleDetails(scope.row)">详情</el-button>
-            <el-button size="mini" type="text" @click="handleEdit(scope.row)">修改</el-button>
+            ${this.form.hasDialog ? `<el-button size="mini" type="text" @click="handleEdit(scope.row)">修改</el-button>` : ``}
+            
           </template>
         </el-table-column>
        </template>
@@ -629,7 +621,7 @@ export default {
     },
     getScript() {
       return `
-      import { listRequest, detailRequest, editRequest, addRequest } from '@/api/template'${this.getScriptImport()}${this.getScriptVue()}
+      import { listRequest, detailRequest ${this.form.hasDialog ? `, editRequest, addRequest` : ''} } from '@/api/template'${this.getScriptImport()}${this.getScriptVue()}
       `
     },
     getScriptImport() {
@@ -652,7 +644,8 @@ export default {
       }
       str += tools.length > 0 ? `import { ${tools} } from '@/utils/tools'` : ''
       str += this.form.hasMoney
-        ? `import NumberRange from '@/components/Range/NumberRange'
+        ? `
+        import NumberRange from '@/components/Range/NumberRange'
         `
         : ''
       str += this.form.hasAddress
@@ -686,6 +679,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
 
     getScriptVue() {
       return `
+      ${this.form.hasDialog ? `let formDetailDetail={${this.getDialogVueDataForm()}\n}` : ''}
       export default {
         name: 'HtmlPage',
         components: {
@@ -696,7 +690,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
           return {
             ${
   this.form.hasTime
-    ? "longtime: longQueryTime(1, 'year'), // 限制时间"
+    ? "longtime: longQueryTime(1, 'year'), // 限制时间\n"
     : ''
 }${this.getBindList()}${
   this.form.hasAddress ? 'cnCity: cityJson.data,\n' : ''
@@ -705,6 +699,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
             pageSize: 10,
             totalSize: 0,
             loading: false,
+            operationWidth:0,
             tableData: [],
             tableWidth: {
               ${this.getTableWidth()}
@@ -713,6 +708,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
             searchData: {
               ${this.getScriptVueSearchData()}
             },
+            // 权限key :this.$hasPermisFn(['signature:sealInfo:applyUserSealProduct']),
             ${this.getDialogVueData()}${this.getDetailVueData()}
           }
         },
@@ -730,7 +726,9 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
     : ''
 }
         },
-        mounted() {},
+        mounted() {
+          this.operationWidth = this.$utils.getOperationWidth2([{value:true,length:2}])
+        },
         methods: {
           ${
   this.form.hasTable
@@ -749,9 +747,9 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
                   this.loading = false;
                   if (res.resultCode == "0000") {
                     this.tableData = res.data.list || [];
-                    this.totalSize = res.data.total || res.data.pagination
+                    this.totalSize = res.data.total || (res.data.pagination
                       ? res.data.pagination.totalRecord
-                      : 0;
+                      : 0);
                   }
                 })
                 .catch(() => {
@@ -822,7 +820,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
             str += `
             ${item.list.name}:${item.list.data},`
           } else {
-            str += `${item.list.name}:[],`
+            str += `${item.list.name}:[],// ${item.label}数组`
           }
         }
       })
@@ -837,7 +835,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
         .forEach(item => {
           if (item.minWidth === 'auto') {
             str += `${item.key}: ${this.getLabelWidth(item.label.length) +
-              10},`
+              30},`
           }
         })
       return str + '\n'
@@ -873,9 +871,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
           ? '\ndateOptions:{disabledDate(time) {const today = new Date();today.setHours(0, 0, 0, 0);return time.getTime() < today.getTime()}},'
           : ''
       }
-      formDetail: {
-        ${this.getDialogVueDataForm()}
-      },
+      formDetail: JSON.parse(JSON.stringify(formDetailDetail)),
       formDetailRules: {
         ${this.getDialogVueDataRules()}
       },`
@@ -941,7 +937,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
           const data = JSON.parse(item.list.data)
           let res = data[0][item.list.key]
           res = res === undefined ? '' : res
-          res = typeof res === 'number' ? res : `'${res}'`
+          res = typeof res === 'string' ? `'${res}'` : res
           return res
         } catch (error) {
           console.log(error)
@@ -1033,9 +1029,9 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
       const text = `handleAdd(){
           this.formDetailJson.type = 'add'
           this.formDetailJson.title = '新增'
-          this.formDetail= {${this.getDialogVueDataForm()}
-          }
-          if (this.$refs.formDetail) this.$refs.formDetail.resetFields()
+          this.formDetail= JSON.parse(JSON.stringify(formDetailDetail))
+        
+          if (this.$refs.formDetail) this.$refs.formDetail.clearValidate()
           this.formDetailDialog = true
       },
       handleEdit(row){
@@ -1043,6 +1039,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
         this.formDetailJson.title = '修改'
           this.formDetail = Object.assign({}, row)
           this.formDetailDialog = true
+          if (this.$refs.formDetail) this.$refs.formDetail.clearValidate()
       },
       dialogSubmitForm(formName){
       this.$refs[formName].validate((valid) => {
@@ -1050,7 +1047,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
           const data = Object.assign({}, this.formDetail)
           const formDetailJson = this.formDetailJson
           const api = formDetailJson.type == 'add' ? addRequest : editRequest
-          this.$confirm(\`确定\${formDetailJson.type == 'add' ? '新增' : '修改'}？\`, '温馨提示', {
+          this.$confirm(\`确定\${formDetailJson.title}？\`, '温馨提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'none'
@@ -1151,7 +1148,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
     },
     getVueSearchDataTime(item) {
       return `${item.search.combination.key1 ||
-        item.key}:getDateTime(longQueryTime(1, 'month')), // 开始时间
+        item.key}:getDateTime(longQueryTime(1, 'month'), 'date') + ' 00:00:00', // 开始时间
       ${item.search.combination.key2 ||
         item.key}:getDateTime(0, 'date') + ' 23:59:59', // 结束时间`
     },
@@ -1164,30 +1161,18 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
     getCSS() {
       return `
       ::v-deep {
-          .search-box .el-input, .search-box .el-select, .search-box .el-date-editor--datetimerange.el-input__inner, .search-box .el-date-editor--daterange.el-input__inner {
-          width: 230px;
-      }
+        
        .form-dialog-box{
-          ::v-deep{
-                .el-select{
+          .el-select{
                   width: 100%;
                 }
-          }
       }
       ${this.form.hasMoney ? '.range-box>.el-input{width: 109px;}' : ''}
-      ${
-  this.form.hasSelect
-    ? '.search-box {.el-select {min-width: 230px;width: auto;.el-input { min-width: 230px;width: auto;}.el-select__tags{overflow: hidden;}}}'
-    : ''
-}
         ${
   this.form.hasTime
-    ? '.time-box{.el-date-editor.el-input .el-input__inner{padding-left: 10px;}}'
+    ? ''
     : ''
 }
-      }
-      .w-100 {
-        width: 100% !important;
       }
       `
     },
@@ -1205,9 +1190,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
   row ? 60 : 30
 }%" 
       ${row ? 'custom-class="form-dialog-row"' : ''}
-      :modal-append-to-body="false"
-      :append-to-body="true"
-      :close-on-click-modal="false">
+      >
        <template>
        ${this.getDialogForm()}
       </template>
@@ -1220,7 +1203,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
     },
     getDialogForm() {
       return `<el-form ref="formDetail" :model="formDetail" :rules="formDetailRules" label-width="${this.getDialogLabelWidth() +
-        10}px" class="form-box">
+        10}px" class="form-dialog-box">
         ${this.getDialogFormItem()}
         </el-form>`
     },
@@ -1312,7 +1295,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
       return `
       <el-form-item label="${item.label}" prop="${item.key}">
       <el-radio-group v-model="formDetail.${item.key}">
-          <el-radio :label="item.${item.list.key}" v-for="(item,index) in ${
+          <el-radio :label="item.${item.list.key || 'value'}" v-for="(item,index) in ${
   item.list.name
 }" :key="'${item.key}List'+index">{{item.${item.list.labelKey ||
         'label'}}}</el-radio>
@@ -1392,9 +1375,6 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
       :visible.sync="dialogVisible"
       width="60%"
       custom-class="details-box"
-      :modal-append-to-body="false"
-      :append-to-body="true"
-      :close-on-click-modal="false"
     >
       <el-form :model="orderDetails" label-width="${this.getDetailLabelWidth() +
         12}px">
@@ -1423,15 +1403,12 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
          <div class="grid-content ${w100 ? 'w-100' : ''}">
           <el-form-item label="${item.label}:">
             <div>
-                <span>{{
-                (
-                  ${item.list.name}.find(
-                    item => item.${item.list.key ||
-                      'value'} == orderDetails.${item.list.key || item.key}
-                  ) || {}
-                ).${item.list.labelKey || 'label'} || orderDetails.${item.list
-  .key || item.key}
-              }}</span>
+                <span>
+                {{ $utils.find(${item.list.name},orderDetails.${item.key},"${item.list
+  .key || 'value'}").${item.list.labelKey || 'label'} || orderDetails.${
+  item.key
+}}}
+               </span>
             </div>
           </el-form-item>
         </div>
