@@ -131,6 +131,28 @@ export const constantRoutes = [
  */
 export const asyncRoutes = [
   tool,
+  {
+    path: '/demo',
+    component: Layout,
+    redirect: '/demo/index',
+    name: 'Demo',
+    meta: {
+      title: 'demo',
+      icon: 'lock',
+      roles: ['admin'] // you can set roles in root nav
+    },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/demo/index'),
+        name: 'DemoIndex',
+        meta: {
+          title: 'DemoIndex',
+          roles: ['admin'] // or you can only set roles in sub nav
+        }
+      }
+    ]
+  },
   // {
   //   path: '/permission',
   //   component: Layout,

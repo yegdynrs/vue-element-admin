@@ -15,6 +15,18 @@ export default {
       component: () => import('@/views/tool/htmlPage'),
       name: 'toolHtmlPage',
       meta: { title: 'html页面自动生成' }
+    },
+    {
+      path: 'newHtml',
+      component: () => import('@/views/tool/newHtml'),
+      name: 'ToolHtml',
+      meta: { title: '新html页面自动生成' }
+    },
+    {
+      path: 'htmlFormPage',
+      component: () => import('@/views/tool/formPage'),
+      name: 'toolHtmlFormPage',
+      meta: { title: '表单自动生成' }
     }
   ]
 }
