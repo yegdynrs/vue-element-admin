@@ -1,5 +1,6 @@
 <!--
 代码重构思想：
+
 循环keyList，生成每个keyList的 html，search，table，dialog，详情，script import依赖，data，methods，最后就行一个去重，编辑融合
 -->
 <template>
