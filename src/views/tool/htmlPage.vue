@@ -440,7 +440,7 @@ export default {
       // }
 
       return `
-      <el-form ref="formSearch" :inline="true" :model="formSearch" ${this.form.searchRow ? '' : `label-width="${this.getSearchLabelWidth()}px"`}  size="small" class="search-box">
+      <el-form ref="formSearch" :inline="true" :model="formSearch" ${this.form.searchRow ? `label-width="${this.getSearchLabelWidth()}px"` : `label-width="${this.getSearchLabelWidth()}px"`}  size="small" class="search-box">
       ${this.getFormItem()}
       <el-form-item label-width="">
           <el-button type="primary" size="small" @click="onSearch">搜 索</el-button>
@@ -550,7 +550,7 @@ export default {
     getTable() {
       if (!this.form.hasTable) return ''
       return `
-       <table-page :table-data="tableData" :show-pagination="true" :current-page="pageIndex"  :total-page="totalSize" :page-size="pageSize" @changPage="currentChange" @sizeChange="handleSizeChange">
+       <table-page :isload="loading" :table-data="tableData" :show-pagination="true" :current-page="pageIndex"  :total-page="totalSize" :page-size="pageSize" @changPage="currentChange" @sizeChange="handleSizeChange">
            ${this.form.hasDialog ? `<div slot="button_box" class="button-box">
         <el-button type="primary" size="small" @click="handleAdd">新 增</el-button>
       </div>` : ``}
@@ -717,7 +717,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
         watch: {},
         activated() {
           this.formSearch = JSON.parse(JSON.stringify(this.searchData))
-          this._getTableList()
+          // this._getTableList()
         },
           created() {
           this.formSearch = JSON.parse(JSON.stringify(this.searchData))${
@@ -1187,9 +1187,9 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
       return `
       <!--新增/修改-->
       <Dialog :title="formDetailJson.title" :to-body="false"  custom-class="seal-dialog" :visible.sync="formDetailDialog" width="${
-  row ? 60 : 30
+  row ? 30 : 30
 }%" 
-      ${row ? 'custom-class="form-dialog-row"' : ''}
+     
       >
        <template>
        ${this.getDialogForm()}
