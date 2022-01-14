@@ -537,7 +537,7 @@ export default {
     },
     getSelectItem(item, row = true) {
       return `<el-form-item label="${item.label}">
-        <el-select v-model.trim="formSearch.${item.key}" placeholder="请选择${
+        <el-select  filterable clearable v-model.trim="formSearch.${item.key}" placeholder="请选择${
   item.label
 }">
           <el-option label="全部" value="" />
