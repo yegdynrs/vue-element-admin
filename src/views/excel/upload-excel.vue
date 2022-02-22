@@ -9,6 +9,7 @@
 
 <script>
 import UploadExcelComponent from '@/components/UploadExcel/index.vue'
+import exportFile from '@/vendor/exportFile'
 
 export default {
   name: 'UploadExcel',
@@ -33,9 +34,45 @@ export default {
       })
       return false
     },
-    handleSuccess({ results, header }) {
-      this.tableData = results
-      this.tableHeader = header
+    handleSuccess(data) {
+      this.tableData = data.results
+      this.tableHeader = data.header
+      console.log(data.results)
+      // [{title:"保险业",desc:'总数',children:[{name:'2021',value:10}]}]
+      let name = ''; let json = {}; const arr = []; let children = []
+      data.results.forEach((item) => {
+        if (!item) {
+          return
+        }
+        if (item?.name?.indexOf('总计') > -1) {
+          return
+        }
+        if (item?.name?.indexOf('汇总') > -1) {
+          // 如果存在汇总，代表是上一个数据的汇总
+          json.desc = item.count
+          return
+        }
+        if (item.name) {
+          // 存在名称
+          json = {}
+          children = []
+          json.children = children
+          name = item.name
+          json.title = name
+          arr.push(json)
+        }
+        children.push({
+          name: item.year.replace('年', ''),
+          value: item.count
+        })
+      })
+      arr.sort((a, b) => {
+        return b.desc - a.desc
+      })
+      exportFile('window.hyzqData=' + JSON.stringify(arr), 'hyzdData.json')
+
+      console.log(arr)
+      //    exportFile(text, 'template.vue')
     }
   }
 }

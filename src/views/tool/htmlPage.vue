@@ -21,8 +21,11 @@
     10：dialog只支持select radio text格式
     11：需要自己调整下格式化出来的空格问题。。。
 
-</pre>
+</pre
+    >
     <el-form ref="form" inline :model="form">
+      <el-checkbox v-model="form.hasDetail" @change="xqchange">需要详情</el-checkbox>
+      <el-checkbox v-model="form.hasTable" @change="tabchange">需要table</el-checkbox>
       <el-table
         ref="table"
         :data="form.keyList"
@@ -89,9 +92,9 @@
         <el-table-column label="搜索" prop="search.value" min-width="120px">
           <template slot-scope="scope">
             <div class="flex-center">
-              <el-checkbox
-                v-model="scope.row.search.value"
-              >为搜索条件</el-checkbox>
+              <el-checkbox v-model="scope.row.search.value"
+                >为搜索条件</el-checkbox
+              >
               <div v-if="scope.row.search.value">
                 <div
                   v-if="scope.row.type !== 'time' && scope.row.type !== 'money'"
@@ -161,10 +164,9 @@
 
         <el-table-column label="操作" fixed="right" min-width="80px">
           <template slot-scope="scope">
-            <el-button
-              size="mini"
-              @click="removeList(scope.$index, scope.row)"
-            >删除</el-button>
+            <el-button size="mini" @click="removeList(scope.$index, scope.row)"
+              >删除</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
@@ -173,11 +175,9 @@
 
       <div>
         <el-button size="small" class="bt" @click="submit">生成页面</el-button>
-        <el-button
-          size="small"
-          class="bt"
-          @click="submitRely"
-        >下载依赖文件</el-button>
+        <el-button size="small" class="bt" @click="submitRely"
+          >下载依赖文件</el-button
+        >
       </div>
       <div>
         <h3>导入数据</h3>
@@ -233,18 +233,18 @@ updateTime (string, optional): 最后更新时间
 </template>
 
 <script>
-import Sortable from 'sortablejs'
-import exportFile from '@/vendor/exportFile'
+import Sortable from "sortablejs";
+import exportFile from "@/vendor/exportFile";
 let defauleJson = {
-  key: '',
-  label: '',
-  minWidth: 'auto', // auto或者具体的px值
+  key: "",
+  label: "",
+  minWidth: "auto", // auto或者具体的px值
   tooltip: true,
   list: {
-    name: '',
-    key: '',
-    labelKey: '',
-    data: '',
+    name: "",
+    key: "",
+    labelKey: "",
+    data: "",
     value: false
   },
   slot: { value: false }, // 有slot的添加slot-scope
@@ -252,177 +252,183 @@ let defauleJson = {
     // 是否是新增，编辑弹窗
     value: false,
     combination: {
-      key1: '',
-      key2: ''
+      key1: "",
+      key2: ""
     }
   },
   table: {
     value: true
   },
-  type: 'text',
+  type: "text",
   search: {
     value: false,
-    key: '',
+    key: "",
     combination: {
-      key1: '',
-      key2: ''
+      key1: "",
+      key2: ""
     },
-    label: ''
+    label: ""
   },
   rowKey: new Date().getTime()
-}
+};
 export default {
-  name: 'HtmlPage',
+  name: "HtmlPage",
   data() {
     return {
       defauleJsonModal: JSON.stringify(defauleJson),
-      importFormData: '',
+      importFormData: "",
       importFormDataJson: {},
       typeList: [
         {
-          value: 'text',
-          label: 'text'
+          value: "text",
+          label: "text"
         },
         {
-          value: 'select',
-          label: '下拉选择'
+          value: "select",
+          label: "下拉选择"
         },
         {
-          value: 'radio',
-          label: '单选'
+          value: "radio",
+          label: "单选"
         },
         {
-          value: 'time',
-          label: '过去时间'
+          value: "time",
+          label: "过去时间"
         },
 
         {
-          value: 'money',
-          label: '数字范围'
+          value: "money",
+          label: "数字范围"
         }
       ],
       form: {
         keyList: [JSON.parse(JSON.stringify(defauleJson))],
+        hasDetail: true,
         hasTime: false, // 存在搜索时间
         hasMoney: false, // 存在搜索钱范围
         hasDialog: false, // 存在dialog，新增，详情
-        searchRow: false // 搜索内容较多时，采用row
+        searchRow: false, // 搜索内容较多时，采用row
+        hasTable: true
       }
-    }
+    };
   },
   watch: {
     defauleJsonModal(val) {
-      val.rowKey = this.form.keyList.length + 1 + new Date().getTime()
-      defauleJson = JSON.parse(val)
+      val.rowKey = this.form.keyList.length + 1 + new Date().getTime();
+      defauleJson = JSON.parse(val);
     }
   },
   mounted() {
-    const sortable = new Sortable(this.$refs.table.$el.querySelector('tbody'), {
+    const sortable = new Sortable(this.$refs.table.$el.querySelector("tbody"), {
       animation: 150,
       onEnd: this.onEnd,
-      ghostClass: 'blue-background-class'
-    })
+      ghostClass: "blue-background-class"
+    });
   },
   methods: {
     upCase(data) {
-      return data[0].toLocaleUpperCase() + data.substr(1)
+      return data[0].toLocaleUpperCase() + data.substr(1);
     },
     onEnd({ newIndex, oldIndex }) {
-      const old = this.form.keyList[oldIndex]
-      this.form.keyList.splice(oldIndex, 1)
-      this.form.keyList.splice(newIndex, 0, old)
+      const old = this.form.keyList[oldIndex];
+      this.form.keyList.splice(oldIndex, 1);
+      this.form.keyList.splice(newIndex, 0, old);
     },
     formJsonModal(val) {
-      this.form = JSON.parse(val)
+      this.form = JSON.parse(val);
     },
     importFormDataModal(val) {
-      var a = val.trim()
-      a = a[a.length - 1] === ',' ? a : (a += ',')
-      a = a.split('\n')
-      let str = ''
-      let isNumber = false
-      let isRadio = false
-      const json = {}
-      const keyList = []
+      var a = val.trim();
+      a = a[a.length - 1] === "," ? a : (a += ",");
+      a = a.split("\n");
+      let str = "";
+      let isNumber = false;
+      let isRadio = false;
+      const json = {};
+      const keyList = [];
       a.map((item, index) => {
         var arr = /(\w*)\s*(\([^\)]*\))([^:：]*[:：]\s*([a-zA-Z0-9\u4e00-\u9fa5]*)\s*(.*)\s*,)?/gim.exec(
           item
-        )
+        );
         // arr值分为null，和非null
         if (arr && arr[1]) {
-          json[arr[1]] = json[arr[1]] || ''
+          json[arr[1]] = json[arr[1]] || "";
           str += `
           ${arr[1]}:'', // ${arr[4]} ${arr[5]}
-          `
-          isNumber = !!(arr[2] && arr[2].indexOf('integer') > -1)
-          isRadio = !!(arr[2] && arr[2].indexOf('boolean') > -1)
+          `;
+          isNumber = !!(arr[2] && arr[2].indexOf("integer") > -1);
+          isRadio = !!(arr[2] && arr[2].indexOf("boolean") > -1);
           // 优化点：数据里面包含 json或者数组的数据的处理方式
-          const data = JSON.parse(JSON.stringify(defauleJson))
-          data.key = arr[1]
-          data.label = arr[4]
-          data.table.value = true
-          data.rowKey = keyList.length + 1 + new Date().getTime()
+          const data = JSON.parse(JSON.stringify(defauleJson));
+          data.key = arr[1];
+          data.label = arr[4];
+          data.table.value = true;
+          data.rowKey = keyList.length + 1 + new Date().getTime();
 
-          if (arr[5] && arr[5] !== ' ') {
+          if (arr[5] && arr[5] !== " ") {
             arr[5] = arr[5]
               .trim()
-              .replace(/[（()）]/gim, '')
-              .replace(/[-\s?]/gim, ' ')
-              .replace(/[：:\s?]/gim, ' ')
-              .replace(/\s+/gim, ' ')
-              .replace(/，/gim, ',')
-            const list = arr[5].split(',')
-            const selectList = []
+              .replace(/[（()）]/gim, "")
+              .replace(/[-\s?]/gim, " ")
+              .replace(/[：:\s?]/gim, " ")
+              .replace(/\s+/gim, " ")
+              .replace(/，/gim, ",");
+            const list = arr[5].split(",");
+            const selectList = [];
             list.forEach(item => {
-              const arr = item.split(' ')
+              const arr = item.split(" ");
               if (arr[1] !== undefined && arr[0] !== undefined) {
                 selectList.push({
                   label: arr[1],
-                  value: (isNumber ? Number(arr[0]) : isRadio ? Boolean(arr[0]) : arr[0])
-                })
+                  value: isNumber
+                    ? Number(arr[0])
+                    : isRadio
+                    ? Boolean(arr[0])
+                    : arr[0]
+                });
               }
-            })
-            data.type = isRadio ? 'radio' : 'select'
-            data.dialog.value = false
-            data.slot.value = true
-            data.list.name = arr[1] + 'List'
-            data.list.value = true
-            data.list.key = 'value'
-            data.list.labelKey = 'label'
-            data.list.data = JSON.stringify(selectList)
+            });
+            data.type = isRadio ? "radio" : "select";
+            data.dialog.value = false;
+            data.slot.value = true;
+            data.list.name = arr[1] + "List";
+            data.list.value = true;
+            data.list.key = "value";
+            data.list.labelKey = "label";
+            data.list.data = JSON.stringify(selectList);
           }
-          keyList.push(data)
+          keyList.push(data);
         }
-        return item
-      })
+        return item;
+      });
       str = `{
         ${str}
-      }`
-      console.log(str)
-      this.importFormDataJson = json
-      this.form.keyList = keyList
+      }`;
+      console.log(str);
+      this.importFormDataJson = json;
+      this.form.keyList = keyList;
     },
     addList() {
-      const data = JSON.parse(JSON.stringify(defauleJson))
-      data.rowKey = this.form.keyList.length + 1 + new Date().getTime()
-      this.form.keyList.push(data)
+      const data = JSON.parse(JSON.stringify(defauleJson));
+      data.rowKey = this.form.keyList.length + 1 + new Date().getTime();
+      this.form.keyList.push(data);
     },
     removeList(index) {
-      this.form.keyList.splice(index, 1)
+      this.form.keyList.splice(index, 1);
     },
     getLabelWidth(value) {
-      if (Object.prototype.toString.call(value) === '[object Array]') {
+      if (Object.prototype.toString.call(value) === "[object Array]") {
         return Math.max(
           ...value.map(item => {
-            return this.getLabelWidth(item.length)
+            return this.getLabelWidth(item.length);
           })
-        )
+        );
       }
-      return value * 14 + 12
+      return value * 14 + 20;
     },
     getForm() {
       if (!this.form.hasForm) {
-        return ''
+        return "";
       }
 
       // if (!this.form.searchRow) {
@@ -441,120 +447,120 @@ export default {
       // }
 
       return `
-      <el-form ref="formSearch" :inline="true" :model="formSearch" ${this.form.searchRow ? `label-width="${this.getSearchLabelWidth()}px"` : `label-width="${this.getSearchLabelWidth()}px"`}  size="small" class="search-box">
+      <el-form ref="formSearch" :inline="true" :model="formSearch" ${
+        this.form.searchRow
+          ? `label-width="${this.getSearchLabelWidth()}px"`
+          : `label-width="${this.getSearchLabelWidth()}px"`
+      }  size="small" class="search-box">
       ${this.getFormItem()}
       <el-form-item label-width="">
           <el-button type="primary" size="small" @click="onSearch">搜 索</el-button>
         </el-form-item>
-      </el-form>`
+      </el-form>`;
     },
     getSearchLabelWidth(data) {
       const obj =
         data ||
         this.form.keyList
           .filter(item => {
-            return item.search.value
+            return item.search.value;
           })
           .map(item => {
-            return item.label
-          })
-      return this.getLabelWidth(obj)
+            return item.label;
+          });
+      return this.getLabelWidth(obj);
     },
     getFormItem(data) {
       const obj =
         data ||
         this.form.keyList.filter(item => {
-          return item.search.value
-        })
-      let text = ''
+          return item.search.value;
+        });
+      let text = "";
       obj.forEach((item, index) => {
-        const fnName = this.getFormItemFn(item.type)
-        const json = JSON.parse(JSON.stringify(item))
-        text += this[fnName](json, this.form.searchRow) + '\n'
-      })
-      return text
+        const fnName = this.getFormItemFn(item.type);
+        const json = JSON.parse(JSON.stringify(item));
+        text += this[fnName](json, this.form.searchRow) + "\n";
+      });
+      return text;
     },
     // 搜索框是类似一行，还是多行
     getSearchRow() {
       return (
         this.form.keyList.filter(item => {
-          return item.search.value
+          return item.search.value;
         }).length < 6
-      )
+      );
     },
     getFormItemFn(type) {
-      let fn = 'getInputItem'
+      let fn = "getInputItem";
       switch (type) {
-        case 'text':
-          fn = 'getInputItem'
-          break
-        case 'select':
-          fn = 'getSelectItem'
-          break
-        case 'radio':
-          fn = 'getRadioItem'
-          break
-        case 'time':
-          fn = 'getTimeItem'
-          break
-        case 'money':
-          fn = 'getMoneyItem'
-          break
+        case "text":
+          fn = "getInputItem";
+          break;
+        case "select":
+          fn = "getSelectItem";
+          break;
+        case "radio":
+          fn = "getRadioItem";
+          break;
+        case "time":
+          fn = "getTimeItem";
+          break;
+        case "money":
+          fn = "getMoneyItem";
+          break;
         default:
-          break
+          break;
       }
-      return fn
+      return fn;
     },
     getInputItem(item, row = true) {
       return `<el-form-item label="${item.label}">
-      <el-input v-model.trim="formSearch.${item.key}" placeholder="请输入${
-  item.label
-}" clearable />
-      </el-form-item>`
+      <el-input v-model.trim="formSearch.${item.key}" placeholder="请输入${item.label}" clearable />
+      </el-form-item>`;
     },
     getMoneyItem(item, row = true) {
       return `
       <el-form-item label="${item.label}">
-       <NumberRange ref="NRange" :value="[formSearch.${
-  item.search.combination.key1
-}, formSearch.${item.search.combination.key2}]" @change=";(formSearch.${
-  item.search.combination.key1
-} = $event[0]), (formSearch.${
-  item.search.combination.key2
-} = $event[1])" />
+       <NumberRange ref="NRange" :value="[formSearch.${item.search.combination.key1}, formSearch.${item.search.combination.key2}]" @change=";(formSearch.${item.search.combination.key1} = $event[0]), (formSearch.${item.search.combination.key2} = $event[1])" />
       </el-form-item>
-      `
+      `;
     },
     getTimeItem(item) {
       return `
        <el-form-item label="${item.label}">
         <datePicker :longtime="longtime" :default-time="[formSearch.${item.search.combination.key1}, formSearch.${item.search.combination.key2}]" is-auto-add-time @change-time="changeTime" />
       </el-form-item>
-      `
+      `;
     },
     getRadioItem(item) {
-      return this.getSelectItem(item)
+      return this.getSelectItem(item);
     },
     getSelectItem(item, row = true) {
       return `<el-form-item label="${item.label}">
-        <el-select  filterable clearable  v-model.trim="formSearch.${item.key}" placeholder="请选择${
-  item.label
-}">
+        <el-select  filterable clearable  v-model.trim="formSearch.${
+          item.key
+        }" placeholder="请选择${item.label}">
           <el-option label="全部" value="" />
           <el-option v-for="(item, index) in ${
-  item.list.name
-}" :key="'formSearch-${item.list.name}-' + index" :value="item.${item
-  .list.key || 'value'}" :label="item.${item.list.labelKey || 'label'}" />
+            item.list.name
+          }" :key="'formSearch-${item.list.name}-' + index" :value="item.${item
+        .list.key || "value"}" :label="item.${item.list.labelKey || "label"}" />
         </el-select>
-      </el-form-item>`
+      </el-form-item>`;
     },
     getTable() {
-      if (!this.form.hasTable) return ''
+      if (!this.form.hasTable) return "";
       return `
        <table-page :isload="loading" :table-data="tableData" :show-pagination="true" :current-page="pageIndex"  :total-page="totalSize" :page-size="pageSize" @changPage="currentChange" @sizeChange="handleSizeChange">
-           ${this.form.hasDialog ? `<div slot="button_box" class="button-box">
+           ${
+             this.form.hasDialog
+               ? `<div slot="button_box" class="button-box">
         <el-button type="primary" size="small" @click="handleAdd">新 增</el-button>
-      </div>` : ``}
+      </div>`
+               : ``
+           }
           
 
       <template slot="table_column">
@@ -562,93 +568,103 @@ export default {
       ${this.getTableItem()}
       <el-table-column label="操作" :width="operationWidth" align="center" fixed="right" v-if="operationWidth">
           <template slot-scope="scope">
-            <el-button size="mini" type="text" @click="handleDetails(scope.row)">详情</el-button>
-            ${this.form.hasDialog ? `<el-button size="mini" type="text" @click="handleEdit(scope.row)">修改</el-button>` : ``}
+            ${
+              this.form.hasDetail
+                ? `<el-button size="mini" type="text" @click="handleDetails(scope.row)">详情</el-button>`
+                : ``
+            }
+            ${
+              this.form.hasDialog
+                ? `<el-button size="mini" type="text" @click="handleEdit(scope.row)">修改</el-button>`
+                : ``
+            }
             
           </template>
         </el-table-column>
        </template>
       </table-page>
-      `
+      `;
     },
     getTableItem() {
       const data = this.form.keyList.filter(item => {
-        return item.table.value
-      })
-      let text = ''
+        return item.table.value;
+      });
+      let text = "";
       data.forEach((item, index) => {
-        const fnName = this.getTableItemFn(item.slot)
-        const json = JSON.parse(JSON.stringify(item))
-        text += this[fnName](json) + '\n'
-      })
-      return text
+        const fnName = this.getTableItemFn(item.slot);
+        const json = JSON.parse(JSON.stringify(item));
+        text += this[fnName](json) + "\n";
+      });
+      return text;
     },
     getTableItemFn(slot) {
-      let fn = 'getTableTextItem'
+      let fn = "getTableTextItem";
       switch (slot.value) {
         case false:
-          fn = 'getTableTextItem'
-          break
+          fn = "getTableTextItem";
+          break;
         case true:
-          fn = 'getTableSelectItem'
-          break
+          fn = "getTableSelectItem";
+          break;
         default:
-          fn = 'getTableTextItem'
-          break
+          fn = "getTableTextItem";
+          break;
       }
-      return fn
+      return fn;
     },
     getTableTextItem(item) {
       return `<el-table-column prop="${item.key}" label="${
         item.label
       }" align="center" :min-width="${
-        item.minWidth === 'auto' ? 'tableWidth.' + item.key : item.minWidth
-      }" ${item.tooltip ? 'show-overflow-tooltip' : ''} />
-`
+        item.minWidth === "auto" ? "tableWidth." + item.key : item.minWidth
+      }" ${item.tooltip ? "show-overflow-tooltip" : ""} />
+`;
     },
     getTableSelectItem(item) {
       return `<el-table-column prop="${item.key}" label="${
         item.label
       }" align="center" :min-width="${
-        item.minWidth === 'auto' ? 'tableWidth.' + item.key : item.minWidth
-      }" ${item.tooltip ? 'show-overflow-tooltip' : ''} >
+        item.minWidth === "auto" ? "tableWidth." + item.key : item.minWidth
+      }" ${item.tooltip ? "show-overflow-tooltip" : ""} >
           <template slot-scope="scope">
             {{ $utils.find(${item.list.name},scope.row.${item.key},"${item.list
-  .key || 'value'}").${item.list.labelKey || 'label'} || scope.row.${
-  item.key
-}}}
+        .key || "value"}").${item.list.labelKey || "label"} || scope.row.${
+        item.key
+      }}}
           </template>
-        </el-table-column>`
+        </el-table-column>`;
     },
     getScript() {
       return `
-      import { listRequest, detailRequest ${this.form.hasDialog ? `, editRequest, addRequest` : ''} } from '@/api/template'${this.getScriptImport()}${this.getScriptVue()}
-      `
+      import { listRequest, detailRequest ${
+        this.form.hasDialog ? `, editRequest, addRequest` : ""
+      } } from '@/api/template'${this.getScriptImport()}${this.getScriptVue()}
+      `;
     },
     getScriptImport() {
-      let str = '\n'
-      const validate = []
-      let tools = []
+      let str = "\n";
+      const validate = [];
+      let tools = [];
       str += this.form.hasSearchTime
         ? `import datePicker from '@/components/TimeInterval/dateRange.vue'
         `
-        : ``
+        : ``;
       str += this.form.hasDialogTime
         ? `import datePicker2 from '@/components/TimeInterval/dateRange2.vue'
         `
-        : ``
+        : ``;
       if (this.form.hasTime && this.form.hasSearchTime) {
-        tools = ['getDateTime', 'longQueryTime']
+        tools = ["getDateTime", "longQueryTime"];
       }
       if (this.form.hasTable) {
-        tools.push('createColumnWidthWatchFn')
+        tools.push("createColumnWidthWatchFn");
       }
-      str += tools.length > 0 ? `import { ${tools} } from '@/utils/tools'` : ''
+      str += tools.length > 0 ? `import { ${tools} } from '@/utils/tools'` : "";
       str += this.form.hasMoney
         ? `
         import NumberRange from '@/components/Range/NumberRange'
         `
-        : ''
+        : "";
       str += this.form.hasAddress
         ? `import hhCascader from '@/components/hhCascader.vue'
         import { cityJson as cityJson2 } from '@/utils/cityData.js'
@@ -656,46 +672,50 @@ import { flatToObj } from '@/utils/tools'
 const cityJson = JSON.parse(JSON.stringify(window.cityJson || cityJson2))
 const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名称
 `
-        : ``
+        : ``;
       str += this.form.hasFile
         ? `import UploadFile from '@/components/hhFileUpload/uploadFileOss'`
-        : ``
+        : ``;
       if (this.form.hasPhone) {
-        validate.push('checkPhone')
+        validate.push("checkPhone");
       }
       if (this.form.hasEnterprise) {
-        validate.push('CheckSocialCreditCode')
+        validate.push("CheckSocialCreditCode");
       }
       if (this.form.hasCertNo) {
-        validate.push('CheckLegalCertNo')
+        validate.push("CheckLegalCertNo");
       }
       if (this.form.hasBankCardNo) {
-        validate.push('CheckBankCardNo')
+        validate.push("CheckBankCardNo");
       }
       if (validate.length > 0) {
-        str += `	import { ${validate} } from '@/utils/validate.js'`
+        str += `	import { ${validate} } from '@/utils/validate.js'`;
       }
-      return str
+      return str;
     },
 
     getScriptVue() {
       return `
-      ${this.form.hasDialog ? `let formDetailDetail={${this.getDialogVueDataForm()}\n}` : ''}
+      ${
+        this.form.hasDialog
+          ? `let formDetailDetail={${this.getDialogVueDataForm()}\n}`
+          : ""
+      }
       export default {
         name: 'HtmlPage',
         components: {
-          ${this.getScriptVueComponents().join(',\n')}
+          ${this.getScriptVueComponents().join(",\n")}
         },
         props: {},
         data() {
           return {
             ${
-  this.form.hasTime
-    ? "longtime: longQueryTime(1, 'year'), // 限制时间\n"
-    : ''
-}${this.getBindList()}${
-  this.form.hasAddress ? 'cnCity: cityJson.data,\n' : ''
-}
+              this.form.hasTime
+                ? "longtime: longQueryTime(1, 'year'), // 限制时间\n"
+                : ""
+            }${this.getBindList()}${
+        this.form.hasAddress ? "cnCity: cityJson.data,\n" : ""
+      }
             pageIndex: 1,
             pageSize: 10,
             totalSize: 0,
@@ -722,18 +742,18 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
         },
           created() {
           this.formSearch = JSON.parse(JSON.stringify(this.searchData))${
-  this.form.hasTable
-    ? "\nthis.$watch('tableData', createColumnWidthWatchFn(this.tableWidth));this._getTableList()"
-    : ''
-}
+            this.form.hasTable
+              ? "\nthis.$watch('tableData', createColumnWidthWatchFn(this.tableWidth));this._getTableList()"
+              : ""
+          }
         },
         mounted() {
           this.operationWidth = this.$utils.getOperationWidth2([{value:true,length:2}])
         },
         methods: {
           ${
-  this.form.hasTable
-    ? ` _getTableList(){
+            this.form.hasTable
+              ? ` _getTableList(){
             const data = JSON.parse(JSON.stringify(Object.assign({}, this.searchData, {
                 pageIndex: this.pageIndex,
                 pageSize: this.pageSize
@@ -767,13 +787,13 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
             this.pageIndex = 1
             this._getTableList()
           },`
-    : ''
-}
+              : ""
+          }
           
-          ${this.form.hasTime ? this.getChangeTimeFn() : ''}
+          ${this.form.hasTime ? this.getChangeTimeFn() : ""}
           ${
-  this.form.hasForm
-    ? `
+            this.form.hasForm
+              ? `
           onSearch() {
             for (const i in this.formSearch) {
               this.searchData[i] = this.formSearch[i]
@@ -782,81 +802,81 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
             this._getTableList()
           },
           `
-    : ''
-}
-          ${this.form.hasDialog ? this.getDialogMethods() : ''}
+              : ""
+          }
+          ${this.form.hasDialog ? this.getDialogMethods() : ""}
           ${this.getDetailMethods()}
         }
            
       }
-    `
+    `;
     },
     getScriptVueComponents() {
-      const componentsArr = []
+      const componentsArr = [];
       if (this.form.hasTable) {
-        componentsArr.push('TablePage')
+        componentsArr.push("TablePage");
       }
       if (this.form.hasSearchTime) {
-        componentsArr.push('datePicker')
+        componentsArr.push("datePicker");
       }
       if (this.form.hasDialogTime) {
-        componentsArr.push('datePicker2')
+        componentsArr.push("datePicker2");
       }
       if (this.form.hasMoney) {
-        componentsArr.push('NumberRange')
+        componentsArr.push("NumberRange");
       }
       if (this.form.hasAddress) {
-        componentsArr.push('hhCascader')
+        componentsArr.push("hhCascader");
       }
       if (this.form.hasFile) {
-        componentsArr.push('UploadFile')
+        componentsArr.push("UploadFile");
       }
-      return [...new Set([componentsArr])]
+      return [...new Set([componentsArr])];
     },
     getBindList() {
-      let str = ''
+      let str = "";
       this.form.keyList.forEach(item => {
         if (item.list.value) {
           if (item.list.data) {
             str += `
-            ${item.list.name}:${item.list.data},`
+            ${item.list.name}:${item.list.data},`;
           } else {
-            str += `${item.list.name}:[],// ${item.label}数组`
+            str += `${item.list.name}:[],// ${item.label}数组`;
           }
         }
-      })
-      return str
+      });
+      return str;
     },
     getTableWidth() {
-      let str = ''
+      let str = "";
       this.form.keyList
         .filter(item => {
-          return item.table.value
+          return item.table.value;
         })
         .forEach(item => {
-          if (item.minWidth === 'auto') {
+          if (item.minWidth === "auto") {
             str += `${item.key}: ${this.getLabelWidth(item.label.length) +
-              30},`
+              30},`;
           }
-        })
-      return str + '\n'
+        });
+      return str + "\n";
     },
     getChangeTimeFn() {
       const timeJson = this.form.keyList.find(item => {
-        return item.type === 'time'
-      })
+        return item.type === "time";
+      });
       return `changeTime(val) {
       this.formSearch.${timeJson.search.combination.key1 ||
         timeJson.key} = val[0]
       this.formSearch.${timeJson.search.combination.key2 ||
         timeJson.key} = val[1]
-    },`
+    },`;
     },
 
     // 获取dialog的vue的data数据
     getDialogVueData() {
       if (!this.form.hasDialog) {
-        return ''
+        return "";
       }
       return `formDetailDialog: false,
       formDetailJson: {
@@ -864,32 +884,32 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
         title: '新增'
       },
       ${this.getDialogVueDataTool()}
-      `
+      `;
     },
     getDialogVueDataTool() {
       return `${
         this.form.hasDialogTime
-          ? '\ndateOptions:{disabledDate(time) {const today = new Date();today.setHours(0, 0, 0, 0);return time.getTime() < today.getTime()}},'
-          : ''
+          ? "\ndateOptions:{disabledDate(time) {const today = new Date();today.setHours(0, 0, 0, 0);return time.getTime() < today.getTime()}},"
+          : ""
       }
       formDetail: JSON.parse(JSON.stringify(formDetailDetail)),
       formDetailRules: {
         ${this.getDialogVueDataRules()}
-      },`
+      },`;
     },
     // 获取dialog的vue的data中的formDetail
     getDialogVueDataForm() {
       const data = this.form.keyList.filter(item => {
-        return item.dialog.value
-      })
-      let text = ''
+        return item.dialog.value;
+      });
+      let text = "";
       data.forEach((item, index) => {
         switch (item.type) {
-          case 'radio':
+          case "radio":
             text += `
-            ${item.key}:${this.getRadioDefault(item)},`
-            break
-          case 'time':
+            ${item.key}:${this.getRadioDefault(item)},`;
+            break;
+          case "time":
             if (
               item.dialog.combination &&
               item.dialog.combination.key1 &&
@@ -898,13 +918,13 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
               text += `
               ${item.dialog.combination.key1}:'',
               ${item.dialog.combination.key2}:'',
-              `
+              `;
             } else {
               text += `
-              ${item.key}:'', // ${item.label}`
+              ${item.key}:'', // ${item.label}`;
             }
-            break
-          case 'money':
+            break;
+          case "money":
             if (
               item.dialog.combination &&
               item.dialog.combination.key1 &&
@@ -913,48 +933,48 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
               text += `
               ${item.dialog.combination.key1}:'',
               ${item.dialog.combination.key2}:'',
-              `
+              `;
             } else {
               text += `
-              ${item.key}:'', // ${item.label}`
+              ${item.key}:'', // ${item.label}`;
             }
-            break
-          case 'address':
+            break;
+          case "address":
             text += `
-            ${item.key}:[],// code数组，如果需要具体name，请使用cityObj[code]获取`
-            break
+            ${item.key}:[],// code数组，如果需要具体name，请使用cityObj[code]获取`;
+            break;
           default:
             text += `
-            ${item.key}:'', // ${item.label}`
-            break
+            ${item.key}:'', // ${item.label}`;
+            break;
         }
-      })
-      return text
+      });
+      return text;
     },
     // 给radio设置默认初始值
     getRadioDefault(item) {
       if (item.list.value && item.list.data) {
         try {
-          const data = JSON.parse(item.list.data)
-          let res = data[0][item.list.key]
-          res = res === undefined ? '' : res
-          res = typeof res === 'string' ? `'${res}'` : res
-          return res
+          const data = JSON.parse(item.list.data);
+          let res = data[0][item.list.key];
+          res = res === undefined ? "" : res;
+          res = typeof res === "string" ? `'${res}'` : res;
+          return res;
         } catch (error) {
-          console.log(error)
+          console.log(error);
         }
       }
-      return "''"
+      return "''";
     },
     // 获取dialog的vue的data中的formDetail的校验
     getDialogVueDataRules() {
       const data = this.form.keyList.filter(item => {
-        return item.dialog.value
-      })
-      let text = ''
+        return item.dialog.value;
+      });
+      let text = "";
       data.forEach((item, index) => {
         switch (item.type) {
-          case 'phone':
+          case "phone":
             text += `
             ${item.key}: [{
             required: true,
@@ -964,9 +984,9 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
               required: true,
               trigger: 'blur',
               validator: checkPhone,
-            }],`
-            break
-          case 'enterprise':
+            }],`;
+            break;
+          case "enterprise":
             text += `
             ${item.key}: [{
             required: true,
@@ -976,9 +996,9 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
               required: true,
               trigger: 'blur',
               validator: CheckSocialCreditCode,
-            }],`
-            break
-          case 'certNo':
+            }],`;
+            break;
+          case "certNo":
             text += `
             ${item.key}: [{
             required: true,
@@ -988,9 +1008,9 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
               required: true,
               trigger: 'blur',
               validator: CheckLegalCertNo,
-            }],`
-            break
-          case 'bankCardNo':
+            }],`;
+            break;
+          case "bankCardNo":
             text += `
             ${item.key}: [{
             required: true,
@@ -1000,47 +1020,50 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
               required: true,
               trigger: 'blur',
               validator: CheckBankCardNo,
-            }],`
-            break
-          case 'address':
+            }],`;
+            break;
+          case "address":
             text +=
               `${item.key}: [{
               required: true,
               message: '请选择${item.label}',
               trigger: 'change',
               type: 'array'
-            }],` + '\n'
+            }],` + "\n";
 
-            break
+            break;
           default:
             text +=
               `${item.key}: [{
               required: true,
-              message: '请${item.type === 'select' ? '选择' : '输入'}${
-  item.label
-}',
-              trigger: '${item.type === 'select' ? 'change' : 'blur'}'
-            }],` + '\n'
-            break
+              message: '请${item.type === "select" ? "选择" : "输入"}${
+                item.label
+              }',
+              trigger: '${item.type === "select" ? "change" : "blur"}'
+            }],` + "\n";
+            break;
         }
-      })
-      return text
+      });
+      return text;
     },
     getDialogMethods() {
       const text = `handleAdd(){
           this.formDetailJson.type = 'add'
           this.formDetailJson.title = '新增'
           this.formDetail= JSON.parse(JSON.stringify(formDetailDetail))
-        
-          if (this.$refs.formDetail) this.$refs.formDetail.clearValidate()
-          this.formDetailDialog = true
+          this.$nextTick(() => {
+            if (this.$refs.formDetail) this.$refs.formDetail.clearValidate()
+          })
+         this.formDetailDialog = true
       },
       handleEdit(row){
         this.formDetailJson.type = 'edit'
         this.formDetailJson.title = '修改'
           this.formDetail = JSON.parse(JSON.stringify(row))
           this.formDetailDialog = true
-          if (this.$refs.formDetail) this.$refs.formDetail.clearValidate()
+          this.$nextTick(() => {
+            if (this.$refs.formDetail) this.$refs.formDetail.clearValidate()
+          })
       },
       dialogSubmitForm(formName){
       this.$refs[formName].validate((valid) => {
@@ -1054,8 +1077,15 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
             type: 'none'
           })
             .then((resj) => {
+              const loading = this.$loading({
+            lock: true,
+            text: 'Loading',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)'
+          })
               api({ data })
                 .then((res) => {
+                  loading.close()
                   if (res.resultCode == '0000') {
                     this.$notify.closeAll()
                     this.$notify.success({
@@ -1068,7 +1098,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
                     throw Error(res.resultMessage)
                   }
                 })
-                .catch(() => {})
+                .catch(() => {loading.close()})
             })
             .catch(() => {
               console.log('取消')
@@ -1077,33 +1107,39 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
       })
       },
       ${this.getDialogMethodsTool()}
-      `
-      return text
+      `;
+      return text;
     },
     getDialogMethodsTool() {
-      let text = ''
+      let text = "";
       const data = this.form.keyList.filter(item => {
-        return item.dialog
-      })
+        return item.dialog;
+      });
       data.forEach((item, index) => {
         if (
-          item.type == 'time' &&
+          item.type == "time" &&
           item.dialog.combination.key1 &&
           item.dialog.combination.key2
         ) {
           text += `changeTimeFormDetail${item.dialog.combination.key1}(val){
             this.formDetail.${item.dialog.combination.key1} = val[0]
             this.formDetail.${item.dialog.combination.key2} = val[1]
-          },`
+          },`;
         }
-      })
-      return text
+      });
+      return text;
     },
     getDetailVueData() {
+      if (!this.form.hasDetail) {
+        return ``;
+      }
       return `dialogVisible: false,
-      orderDetails: {}, // 详情`
+      orderDetails: {}, // 详情`;
     },
     getDetailMethods() {
+       if (!this.form.hasDetail) {
+        return ``;
+      }
       return `// 详情
     handleDetails(row) {
       detailRequest({ data: { id: row.id }}).then((res) => {
@@ -1113,50 +1149,50 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
         }
       })
     },
-    `
+    `;
     },
     getScriptVueSearchData() {
-      let text = ''
+      let text = "";
       this.form.keyList
         .filter(item => {
-          return item.search.value
+          return item.search.value;
         })
         .forEach((item, index) => {
-          const fnName = this.getScriptVueSearchDataFn(item.type)
-          const json = JSON.parse(JSON.stringify(item))
-          text += this[fnName](json) + '\n'
-        })
-      return text
+          const fnName = this.getScriptVueSearchDataFn(item.type);
+          const json = JSON.parse(JSON.stringify(item));
+          text += this[fnName](json) + "\n";
+        });
+      return text;
     },
     getScriptVueSearchDataFn(type) {
-      let fn = 'getVueSearchDataText'
+      let fn = "getVueSearchDataText";
       switch (type) {
-        case 'time':
-          fn = 'getVueSearchDataTime'
-          break
-        case 'money':
-          fn = 'getVueSearchDataMoney'
-          break
+        case "time":
+          fn = "getVueSearchDataTime";
+          break;
+        case "money":
+          fn = "getVueSearchDataMoney";
+          break;
         default:
-          fn = 'getVueSearchDataText'
-          break
+          fn = "getVueSearchDataText";
+          break;
       }
-      return fn
+      return fn;
     },
     getVueSearchDataText(item) {
       return `${item.search.key || item.key}:'', // ${item.search.label ||
-        item.label}`
+        item.label}`;
     },
     getVueSearchDataTime(item) {
       return `${item.search.combination.key1 ||
         item.key}:getDateTime(longQueryTime(1, 'month'), 'date') + ' 00:00:00', // 开始时间
       ${item.search.combination.key2 ||
-        item.key}:getDateTime(0, 'date') + ' 23:59:59', // 结束时间`
+        item.key}:getDateTime(0, 'date') + ' 23:59:59', // 结束时间`;
     },
     getVueSearchDataMoney(item) {
       return `${item.search.combination.key1 || item.key}:'', // 金额范围
       ${item.search.combination.key2 || item.key}:'', // 金额范围
-      `
+      `;
     },
 
     getCSS() {
@@ -1168,28 +1204,24 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
                   width: 100%;
                 }
       }
-      ${this.form.hasMoney ? '.range-box>.el-input{width: 109px;}' : ''}
-        ${
-  this.form.hasTime
-    ? ''
-    : ''
-}
+      ${this.form.hasMoney ? ".range-box>.el-input{width: 109px;}" : ""}
+        ${this.form.hasTime ? "" : ""}
       }
-      `
+      `;
     },
     getDialog() {
       if (!this.form.hasDialog) {
-        return ''
+        return "";
       }
       const row =
         this.form.keyList.filter(item => {
-          return item.dialog.value
-        }).length > 6
+          return item.dialog.value;
+        }).length > 6;
       return `
       <!--新增/修改-->
       <Dialog :title="formDetailJson.title" :to-body="false"  custom-class="seal-dialog" :visible.sync="formDetailDialog" width="${
-  row ? 30 : 30
-}%" 
+        row ? 30 : 30
+      }%" 
      
       >
        <template>
@@ -1200,108 +1232,108 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
         <el-button type="primary" size="small" @click="dialogSubmitForm('formDetail')">确定</el-button>
       </template>
       </Dialog>
-      `
+      `;
     },
     getDialogForm() {
       return `<el-form ref="formDetail" :model="formDetail" :rules="formDetailRules" label-width="${this.getDialogLabelWidth() +
-        10}px" class="form-dialog-box">
+        20}px" class="form-dialog-box">
         ${this.getDialogFormItem()}
-        </el-form>`
+        </el-form>`;
     },
     getDialogLabelWidth() {
       const obj = this.form.keyList
         .filter(item => {
-          return item.dialog.value
+          return item.dialog.value;
         })
         .map(item => {
-          return item.label
-        })
-      return this.getLabelWidth(obj)
+          return item.label;
+        });
+      return this.getLabelWidth(obj);
     },
     getDialogFormItem() {
       const data = this.form.keyList.filter(item => {
-        return item.dialog.value
-      })
-      let text = ''
+        return item.dialog.value;
+      });
+      let text = "";
       data.forEach((item, index) => {
-        const fnName = this.getDiaLogFormItemFn(item.type)
-        const json = JSON.parse(JSON.stringify(item))
-        text += this[fnName](json) + '\n'
-      })
-      return text
+        const fnName = this.getDiaLogFormItemFn(item.type);
+        const json = JSON.parse(JSON.stringify(item));
+        text += this[fnName](json) + "\n";
+      });
+      return text;
     },
     getDiaLogFormItemFn(type) {
-      let fn = 'getDialogInputItem'
+      let fn = "getDialogInputItem";
       switch (type) {
-        case 'text':
-          fn = 'getDialogInputItem'
-          break
-        case 'select':
-          fn = 'getDialogSelectItem'
-          break
-        case 'radio':
-          fn = 'getDialogRadiotem'
-          break
-        case 'futureTime':
-          fn = 'getDialogTimeItem'
-          break
-        case 'money':
-          fn = 'getDialogMoneyItem'
-          break
-        case 'file':
-          fn = 'getDialogFile'
-          break
-        case 'address':
-          fn = 'getDialogAddress'
-          break
-        case 'phone':
-          fn = 'getDialogPhone'
-          break
-        case 'enterprise':
-          fn = 'getDialogEnterprise'
-          break
-        case 'certNo ':
-          fn = 'getDialogInputItem'
-          break
-        case 'bankCardNo':
-          fn = 'getDialogInputItem'
-          break
+        case "text":
+          fn = "getDialogInputItem";
+          break;
+        case "select":
+          fn = "getDialogSelectItem";
+          break;
+        case "radio":
+          fn = "getDialogRadiotem";
+          break;
+        case "futureTime":
+          fn = "getDialogTimeItem";
+          break;
+        case "money":
+          fn = "getDialogMoneyItem";
+          break;
+        case "file":
+          fn = "getDialogFile";
+          break;
+        case "address":
+          fn = "getDialogAddress";
+          break;
+        case "phone":
+          fn = "getDialogPhone";
+          break;
+        case "enterprise":
+          fn = "getDialogEnterprise";
+          break;
+        case "certNo ":
+          fn = "getDialogInputItem";
+          break;
+        case "bankCardNo":
+          fn = "getDialogInputItem";
+          break;
         default:
-          break
+          break;
       }
-      return fn
+      return fn;
     },
     // 获取dialog的输入框 item
     getDialogInputItem(item) {
       return `
           <el-form-item label="${item.label}" prop="${item.key}">
             <el-input v-model.trim="formDetail.${item.key}" type="text" placeholder="请输入${item.label}" clearable />
-          </el-form-item>`
+          </el-form-item>`;
     },
     // 获取dialog的选择框 item
     getDialogSelectItem(item) {
       return `
           <el-form-item label="${item.label}" prop="${item.key}">
             <el-select v-model="formDetail.${
-  item.key
-}" clearable filterable placeholder="请选择${item.label}">
+              item.key
+            }" clearable filterable placeholder="请选择${item.label}">
               <template v-for="(item,index) in ${item.list.name}">
                 <el-option :key="'${item.key}List'+index" :label="item.${item
-  .list.labelKey || 'label'}" :value="item.${item.list.key || 'value'}" />
+        .list.labelKey || "label"}" :value="item.${item.list.key || "value"}" />
               </template>
             </el-select>
-          </el-form-item>`
+          </el-form-item>`;
     },
     getDialogRadiotem(item) {
       return `
       <el-form-item label="${item.label}" prop="${item.key}">
       <el-radio-group v-model="formDetail.${item.key}">
-          <el-radio :label="item.${item.list.key || 'value'}" v-for="(item,index) in ${
-  item.list.name
-}" :key="'${item.key}List'+index">{{item.${item.list.labelKey ||
-        'label'}}}</el-radio>
+          <el-radio :label="item.${item.list.key ||
+            "value"}" v-for="(item,index) in ${item.list.name}" :key="'${
+        item.key
+      }List'+index">{{item.${item.list.labelKey || "label"}}}</el-radio>
         </el-radio-group>
-       </el-form-item>`
+       </el-form-item>`;
     },
     // 获取dialog的时间选择
     getDialogTimeItem(item) {
@@ -1314,7 +1346,7 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
         return `
           <el-form-item label="${item.label}"  class="is-required">
             <datePicker2 :default-time="[formDetail.${item.dialog.combination.key1}, formDetail.${item.dialog.combination.key2}]" :picker-options="dateOptions" is-auto-add-time @change-time="changeTimeFormDetail${item.dialog.combination.key1}" />
-          </el-form-item>`
+          </el-form-item>`;
       } else {
         return `
          <el-form-item label="${item.label}" prop="${item.key}">
@@ -1328,18 +1360,18 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
               style="width: 100%"
               placement="bottom-start"
             />
-         </el-form-item>`
+         </el-form-item>`;
       }
     },
     // 获取dialog的金钱选择
     getDialogMoneyItem(item) {
       return `<el-form-item label="${item.label}"  prop="${item.key}">
        <NumberRange ref="NRangeForm" :value="[formDetail.${item.dialog.combination.key1}, formDetail.${item.dialog.combination.key2}]" @change=";(formDetail.${item.dialog.combination.key1} = $event[0]), (formDetail.${item.dialog.combination.key2} = $event[1])" />
-      </el-form-item>`
+      </el-form-item>`;
     },
     // 文件上传
     getDialogFile() {
-      return ''
+      return "";
     },
     // 地址选择器
     getDialogAddress(item) {
@@ -1351,24 +1383,27 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
               clearable
               style="display: block"
             />
-        </el-form-item>`
+        </el-form-item>`;
     },
     // 手机
     getDialogPhone(item) {
       return `
           <el-form-item label="${item.label}" prop="${item.key}">
             <el-input v-model.trim="formDetail.${item.key}" type="text" maxlength="11" placeholder="请输入${item.label}" clearable />
-          </el-form-item>`
+          </el-form-item>`;
     },
     // 企业社会信用代码
     getDialogEnterprise(item) {
       return `
           <el-form-item label="${item.label}" prop="${item.key}">
             <el-input v-model.trim="formDetail.${item.key}" type="text" maxlength="18" placeholder="请输入${item.label}" clearable />
-          </el-form-item>`
+          </el-form-item>`;
     },
     // 获取详情的view
     getDetail() {
+       if (!this.form.hasDetail) {
+        return ``;
+      }
       return `
       <!--详情-->
        <Dialog
@@ -1378,101 +1413,101 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
       custom-class="details-box"
     >
       <el-form :model="orderDetails" label-width="${this.getDetailLabelWidth() +
-        12}px">
+        16}px">
           ${this.getDetailItem()}
       </el-form>
       <div slot="footer" class="dialog-footer" align="center">
         <el-button size="small" @click="dialogVisible = false">关 闭</el-button>
       </div>
     </Dialog>
-      `
+      `;
     },
     getDetailLabelWidth() {
       const obj = this.form.keyList.map(item => {
-        return item.label
-      })
-      return this.getLabelWidth(obj)
+        return item.label;
+      });
+      return this.getLabelWidth(obj);
     },
     getDetailItem() {
-      let text = ''
+      let text = "";
       this.form.keyList.forEach((item, index) => {
         const w100 =
-          index === this.form.keyList.length - 1 && (index + 1) % 2 === 1
+          index === this.form.keyList.length - 1 && (index + 1) % 2 === 1;
         text +=
-          (item.type === 'select' || item.type === 'radio') && item.slot.value
+          (item.type === "select" || item.type === "radio") && item.slot.value
             ? `
-         <div class="grid-content ${w100 ? 'w-100' : ''}">
+         <div class="grid-content ${w100 ? "w-100" : ""}">
           <el-form-item label="${item.label}:">
             <div>
                 <span>
-                {{ $utils.find(${item.list.name},orderDetails.${item.key},"${item.list
-  .key || 'value'}").${item.list.labelKey || 'label'} || orderDetails.${
-  item.key
-}}}
+                {{ $utils.find(${item.list.name},orderDetails.${
+                item.key
+              },"${item.list.key || "value"}").${item.list.labelKey ||
+                "label"} || orderDetails.${item.key}}}
                </span>
             </div>
           </el-form-item>
         </div>
          `
             : `
-          <div class="grid-content ${w100 ? 'w-100' : ''}">
+          <div class="grid-content ${w100 ? "w-100" : ""}">
           <el-form-item label="${item.label}:">
             <div> {{ orderDetails.${item.key} }}</div>
           </el-form-item>
         </div>
-         ` + '\n'
-      })
-      return text
+         ` + "\n";
+      });
+      return text;
     },
     textInit() {
-      let hasTime = false
-      let hasSearchTime = false
-      let hasMoney = false
-      let hasForm = false
-      let hasDialog = false
-      let hasSelect = false
-      let hasTable = false
-      const hasPhone = false
+      let hasTime = false;
+      let hasSearchTime = false;
+      let hasMoney = false;
+      let hasForm = false;
+      let hasDialog = false;
+      let hasSelect = false;
+      let hasTable = false;
+      const hasPhone = false;
       this.form.keyList.forEach(item => {
         if (item.search.value) {
-          hasForm = true
+          hasForm = true;
         }
-        if (item.table.value) {
-          hasTable = true
-        }
-        if (item.type === 'time') {
-          hasTime = true
+        // if (item.table.value) {
+        //   hasTable = true;
+        // }
+        if (item.type === "time") {
+          hasTime = true;
           if (item.search.value) {
-            hasSearchTime = true
+            hasSearchTime = true;
           }
         }
 
-        if (item.type === 'money') {
-          hasMoney = true
+        if (item.type === "money") {
+          hasMoney = true;
         }
-        if (item.type === 'select') {
-          hasSelect = true
+        if (item.type === "select") {
+          hasSelect = true;
         }
         if (item.dialog.value) {
-          hasDialog = true
+          hasDialog = true;
         }
-      })
-      this.form.hasForm = hasForm
-      this.form.hasTime = hasTime
-      this.form.hasMoney = hasMoney
-      this.form.hasDialog = hasDialog
-      this.form.hasSelect = hasSelect
-      this.form.hasTable = hasTable
-      this.form.hasPhone = hasPhone
+      });
+      this.form.hasForm = hasForm;
+      this.form.hasTime = hasTime;
+      this.form.hasMoney = hasMoney;
+      this.form.hasDialog = hasDialog;
+      this.form.hasSelect = hasSelect;
+      // this.form.hasTable = hasTable;
+      this.form.hasPhone = hasPhone;
 
-      this.form.hasSearchTime = hasSearchTime
+      this.form.hasSearchTime = hasSearchTime;
 
-      this.form.searchRow = this.getSearchRow()
+      this.form.searchRow = this.getSearchRow();
     },
 
     // 生成页面
     submit() {
-      this.textInit()
+      this.textInit();
       const text = `
 <template>
     <div class="app-container">${this.getForm()}${this.getTable()}${this.getDialog()}${this.getDetail()}
@@ -1483,26 +1518,40 @@ const cityObj = flatToObj(cityJson.data) // cityObj[code]获取省市区的名�
 <style lang="scss" scoped>
     ${this.getCSS()}
 </style>
-   `
-      exportFile(text, 'template.vue')
+   `;
+      exportFile(text, "template.vue");
     },
     // 生成依赖
     submitRely() {
-      this.$refs.rely.click()
+      this.$refs.rely.click();
     },
     listChange(scope) {
       if (scope.row.list.value) {
-        scope.row.list.key = 'value'
-        scope.row.list.labelKey = 'label'
-        scope.row.list.name = scope.row.key && scope.row.key + 'List'
+        scope.row.list.key = "value";
+        scope.row.list.labelKey = "label";
+        scope.row.list.name = scope.row.key && scope.row.key + "List";
       } else {
-        scope.row.list.key = ''
-        scope.row.list.labelKey = ''
-        scope.row.list.name = ''
+        scope.row.list.key = "";
+        scope.row.list.labelKey = "";
+        scope.row.list.name = "";
+      }
+    },
+    tabchange(){
+      if(!this.form.hasTable){
+        this.form.keyList.forEach((item)=>{
+          item.table.value = this.form.hasTable
+        })
+      }
+    },
+    xqchange(){
+ if(!this.form.hasDetail){
+        this.form.keyList.forEach((item)=>{
+          item.dialog.value = this.form.hasDetail
+        })
       }
     }
   }
-}
+};
 </script>
 <style lang="scss" scoped>
 .content {

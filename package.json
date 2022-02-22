@@ -14,7 +14,7 @@
     "svgo": "svgo -f src/icons/svg --config=src/icons/svgo.yml",
     "test:unit": "jest --clearCache && vue-cli-service test:unit",
     "test:ci": "npm run lint && npm run test:unit",
-    "pushbu":"npm run build:prod && git add . && git commit -m \"自动push\" -n && git push"
+    "pushbu":"npm run build:prod && git commit -am \"自动push\"  && git pull && git push"
   },
   "dependencies": {
     "axios": "0.18.1",

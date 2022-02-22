@@ -78,7 +78,7 @@ export default {
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['Id', 'Title', 'Author', 'Readings', 'Date']
+        const tHeader = ['Id', '名称', '头像', '名称2', '名称3']
         const filterVal = ['id', 'title', 'author', 'pageviews', 'display_time']
         const list = this.list
         const data = this.formatJson(filterVal, list)
