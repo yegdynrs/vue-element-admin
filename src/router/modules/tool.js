@@ -17,11 +17,17 @@ export default {
       meta: { title: 'html页面自动生成' }
     },
     {
-      path: 'newHtml',
-      component: () => import('@/views/tool/newHtml'),
-      name: 'ToolHtml',
-      meta: { title: '新html页面自动生成' }
+      path: 'htmlPageJSON',
+      component: () => import('@/views/tool/htmlJSON'),
+      name: 'toolHtmlJSON',
+      meta: { title: 'JSON页面自动生成' }
     },
+    // {
+    //   path: 'newHtml',
+    //   component: () => import('@/views/tool/newHtml'),
+    //   name: 'ToolHtml',
+    //   meta: { title: '新html页面自动生成' }
+    // },
     {
       path: 'htmlFormPage',
       component: () => import('@/views/tool/formPage'),
