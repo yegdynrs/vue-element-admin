@@ -423,7 +423,7 @@ this.importFormDataModal(str)
       let isRadio = false
       const json = {}
       const keyList = []
-      a.map((item, index) => { 
+      a.map((item, index) => {  
         var arr = /([\w\.]*)\s*(\([^\)]*\))([^:：]*[:：]\s*([a-zA-Z0-9\u4e00-\u9fa5\(\（\）\)]*)\s*(.*)\s*[,])?/gim.exec(item)
         // arr值分为null，和非null
         if (arr && arr[1]) {
