@@ -8,6 +8,11 @@
     <template slot="header">页面生成JSON-wanghao</template>
     <a ref="rely" href="./static/rely.zip" download="依赖文件" class="d-none" />
     <pre>
+未完成事项：
+    1、文字相似度匹配，原型的字段与后端注释的文字相似的匹配原型文字
+    2、mock数据，表格、搜索条件mock、详情返回 一套生成
+    3、考虑需不需要 纯简单页面，页面数据只保留接口字段string完成页面，（赶时间要求不高那种）
+
 该table表示detail的所有字段
     1：占据宽度（table）  auto/具体px  当为auto表示table将自动计算宽度
     2：新增表单，勾选后将纳入到新增修改的detail中
@@ -131,11 +136,12 @@
 
       <div>
         <el-button size="small" class="bt" @click="submit">生成页面</el-button>
-                <el-button size="small" class="bt" @click="submitTableKey">table字段提取</el-button>
+                <el-button size="small" class="bt" @click="submitTableKey">提取mock</el-button>
 
       </div>
-      <div>
-        <h3>导入数据</h3>
+      <div class="section-box">
+                      <h3>导入数据</h3>
+
         <pre class="text-left">
 测试数据：
 chnExtinfo (string, optional): 渠道配置扩展 ,
@@ -157,26 +163,60 @@ singleQuota (number, optional): 单笔限额 ,
 updateTime (string, optional): 最后更新时间
         </pre>
         <el-input v-model="importFormData" type="textarea" :autosize="{ minRows: 2, maxRows: 4 }" placeholder="请输入数据模板" @change="importFormDataModal" />
+
       </div>
 
       <!--  根据原型调整顺序，把和原型不一样的筛查到最前面  -->
-      <div>
-        <h3>根据原型顺序调整,把后端结构和原型不一样的筛查到最前面，</h3>
+      <div class="section-box">
+                      <h3>根据原型顺序调整,把后端结构和原型不一样的筛查到最前面，</h3>
+
+        <pre class="text-left">
+测试数据：
+规则名称
+
+
+规则说明
+        </pre>
         <el-input v-model="defaultSortData" @change="defaultSort" type="textarea" :autosize="{ minRows: 2, maxRows: 4 }" placeholder="请输入数据模板" />
+
+      </div>
+      <div class="section-box">
+                <h3>apiDoc</h3>
+
+        <pre class="text-left">
+测试数据：
+list[0].ruleId	Integer	是	规则主键id	
+list[0].ruleName	String	是	规则名称
+list[0].ruleDesc	String	是	规则说明
+        </pre>
+        <el-input v-model="defaultApiDocData" @change="defaultApiDoc" type="textarea" :autosize="{ minRows: 2, maxRows: 4 }" placeholder="请输入apiDoc数据" />
       </div>
 
- <div>
-        <h3>JAVA注解结构</h3>
+      <div class="section-box">
+                     <h3>JAVA注解结构</h3>
+
+        <pre class="text-left">
+@ApiModelProperty("主键")
+private Integer shareId;
+
+@ApiModelProperty("订单编号")
+private String orderNo;
+        </pre>
         <el-input v-model="defaultJavaData" @change="defaultJava" type="textarea" :autosize="{ minRows: 2, maxRows: 4 }" placeholder="请输入数据模板" />
+
       </div>
-      <div>
+
+    
+      <div class="section-box">
+                      <h3>完整数据</h3>
+
+        <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 4 }" placeholder="请输入表单" :value="JSON.stringify(form)" @input="formJsonModal" />
+
+      </div>
+        <!-- <div>
         <h3>数据模板</h3>
         <el-input v-model="defauleJsonModal" type="textarea" :autosize="{ minRows: 2, maxRows: 4 }" placeholder="请输入数据模板" />
-      </div>
-      <div>
-        <h3>完整数据</h3>
-        <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 4 }" placeholder="请输入表单" :value="JSON.stringify(form)" @input="formJsonModal" />
-      </div>
+      </div> -->
     </el-form>
     <!-- <xklView class="xkl"></xklView> -->
   </div>
@@ -239,6 +279,7 @@ export default {
       importFormData: '',
       defaultSortData: '',
       defaultJavaData: '',
+      defaultApiDocData: '',
       importFormDataJson: {},
       typeList: [
         {
@@ -276,7 +317,7 @@ export default {
         hasDetail: false,
         hasTime: false, // 存在搜索时间
         hasMoney: false, // 存在搜索钱范围
-        hasDialog: true, // 存在dialog，新增，详情
+        hasDialog: false, // 存在dialog，新增，详情
         searchRow: false, // 搜索内容较多时，采用row
         hasTable: true,
       },
@@ -353,15 +394,25 @@ export default {
       }
       
       let arr = val.split('\n\n')
-      this.form.keyList = arr.map((item,index)=>{
-        let c = /"(.*)".*\n.*\s([^\s]*);/img.exec(item)
-         const data = JSON.parse(JSON.stringify(defauleJson))
-          data.label = c[1]||''
-          data.key = c[2]||''
-          data.rowKey = index + 1 + new Date().getTime()
-          return data
+      var str = ``;
+     arr.map((item,index)=>{
+        let c = /"(.*)".*\n.*\s([^\s]*)\s([^\s]*);/img.exec(item)
+        str+= `${c[3]} (${c[2]}, optional): ${c[1]} ,\n`
       })
-      console.log(this.form.keyList)
+      this.importFormDataModal(str)
+    },
+    defaultApiDoc(val){
+       if (!val) {
+        return
+      }
+var str = ``;
+val.split("\n").forEach((item)=>{
+var text = item.replace(/[\s\n\t]/img,'--').split("--")
+str+= `${text[0].replace("list[0].",'')} (${text[1]}, optional): ${text[3]} ,\n`
+
+})
+this.importFormDataModal(str)
+
     },
     importFormDataModal(val) {
       var a = val.trim()
@@ -373,7 +424,7 @@ export default {
       const json = {}
       const keyList = []
       a.map((item, index) => {
-        var arr = /(\w*)\s*(\([^\)]*\))([^:：]*[:：]\s*([a-zA-Z0-9\u4e00-\u9fa5\(\（\）\)]*)\s*(.*)\s*[,])?/gim.exec(item)
+        var arr = /([\w\.]*)\s*(\([^\)]*\))([^:：]*[:：]\s*([a-zA-Z0-9\u4e00-\u9fa5\(\（\）\)]*)\s*(.*)\s*[,])?/gim.exec(item)
         // arr值分为null，和非null
         if (arr && arr[1]) {
           json[arr[1]] = json[arr[1]] || ''
@@ -529,7 +580,7 @@ export default {
                     type: 'select',
                      selectList: ${item.list.data || '[]'},
                      moreParam: { hasAll: true, selectlabel: '${item.list.labelKey || this.list.defaultLabelKey}', selectValue: '${item.list.key || this.list.defaultValueKey}' },
-                     attr: { filterable: true }
+                     attr: { filterable: true, clearable: true }
                 },\n`
         } else if (item.type == 'time'||item.type=='dateLimit') {
           str += `{ valueKey: ['${item.search.combination.key1}', '${item.search.combination.key2}'], value: ['', ''], name: '${item.search.label||item.label}', type: 'dateLimit', attr: { islimitlength: true, dataNotLimit: ${item.type=='dateLimit'},  longtime: longQueryTime(1, 'year') }},\n`
@@ -581,23 +632,26 @@ export default {
      
       let str = ''
            this.form.keyList.forEach((item) => {
-              if(item.type=='radio'){
-                let value = ''
-                 try {
-                 let list =  JSON.parse(item.list.data)
-                  if(list.length){
-                   value = list[0][item.list.key || this.list.defaultValueKey]
-                   value = typeof value=='number'?value:`'${value}'`
-                  }
-                 } catch (error) {
-                 }
-                str+=`'${item.key}':${value},// ${item.label} \n`
-              }else{
-                str+=`'${item.key}':'', //  ${item.label} \n`
+              let mockVal = `'${item.label}'`
+              if(item.type=='radio'||item.type=='select'){
+                mockVal = `/${(JSON.parse(item.list.data)||[]).map(v=>`(${v[item.list.key]})`).join('|')}/`
               }
+              if(item.type=='time'||item.type=='dateLimit'){
+                mockVal = `'@datetime()'`
+              }
+              if(item.type=='number'||['元','总','金额','数','笔','次'].some(v=>item.label.includes(v))){
+                 mockVal = `/[0-9]{3}/`
+              }
+               str+=`'${item.key}': data.${item.key} || ${mockVal}, //  ${item.label} \n`
             })
-alert('控制台输出')
-             console.log(`{${str}}`)
+this.$message.success('结果在控制台输出')
+  console.log(`export const getMockList = ({ data = {}}) => {
+  return listCon(
+    mock({
+      'list|3-10': [{${str}} ]
+    })
+  )
+}`)
 
 },
     getDialogDefault(data,type='dialog'){
@@ -630,6 +684,12 @@ alert('控制台输出')
     },
     formInit() {
       this.form.keyList.forEach((item) => {
+        if(item.table.value){
+          this.form.hasTable = true
+        }
+        if(item.dialog.value){
+          this.form.hasDialog = true
+        }
         if (item.type === 'time') {
           this.form.hasTime = true
         }
@@ -638,6 +698,30 @@ alert('控制台输出')
     zibao() {
       this.$xkl.start()
     },
+    getImportCom(){
+      let arr = [{
+        name:'HhPage',
+        value:this.form.hasTable,
+        api:'listRequest',
+        components:`import HhPage from '@/components/HhPage/page'`
+      },
+      {
+        name:'HhFormDialog',
+        value:this.form.hasDialog,
+        api:' addRequest, editRequest',
+        components:`import HhFormDialog from '@/components/HhPage/form-dialog'`
+      },{
+        name:'HhDetailDialog',
+        value:this.form.hasDetail,
+        api:'detailRequest',
+        components:`import HhDetailDialog from '@/components/HhPage/detail-dialog'`
+      }]
+      return {
+        api:arr.filter(v=>v.value).map(v=>v.api).join(', '),
+        comImport: arr.filter(v=>v.value).map(v=>v.components).join('\n'),
+        components: arr.filter(v=>v.value).map(v=>v.name).join(', '),
+      }
+    },
     // 生成页面
     submit() {
       if (!this.form.hasTable && !this.form.hasDetail && !this.hasDialog) {
@@ -645,6 +729,7 @@ alert('控制台输出')
         return
       }
       this.formInit()
+      
       const text = `
 <template>
   <div>
@@ -654,15 +739,15 @@ alert('控制台输出')
   </div>
 </template>
 <script>
-${this.form.hasTable ? `import HhPage from '@/components/HhPage/page'` : ''}
-import { ${this.form.hasTable ? `listRequest` : ''}${this.form.hasDialog ? `, addRequest, editRequest` : ''}${this.form.hasDetail ? `, detailRequest` : ''} } from '@/api/template'
+${this.getImportCom().comImport}
+import { ${this.getImportCom().api} } from '@/api/template'
 ${this.form.hasTime ? `import { longQueryTime } from '@/utils/tools'` : ''}
 ${this.form.hasDialog?`const defaultFormValue = {
               ${this.getDialogDefault()}
               }`:''}
 export default {
   name: '',
-  components: { ${this.form.hasTable ? `HhPage` : ''} },
+  components: { ${this.getImportCom().components}  },
   data() {
     return {
       ${
@@ -686,7 +771,7 @@ export default {
           ? `
    
         {
-          permiss: 'fee:feeSplitting:add',
+          permiss: true, // or string 权限标识符
           name: '新增',
           click: this.hanldAdd
         }
@@ -700,7 +785,7 @@ export default {
           ? `
    
          {
-          permiss: 'feeSplitting:list:detail',
+          permiss: true, // or string 权限标识符
           name: '详情',
           click: this.hanldDetail
         },
@@ -713,7 +798,7 @@ export default {
           ? `
    
          {
-          permiss: 'feeSplitting:list:edit',
+          permiss: true, // or string 权限标识符
           name: '修改',
           click: this.hanldEdit
         },
@@ -777,7 +862,7 @@ export default {
         return res
       })
     },
-       // 表单弹窗事件，也可以不要
+       // 表单弹窗取消事件，也可以不要
     formCancel(type) {
       if (type == 'success') {
         this.$refs.page._getTableList()
@@ -870,4 +955,19 @@ export default {
   top: 0;
   z-index: 0;
 }
+
+.section-box{
+  padding: 10px;
+  border-radius: 10px;
+  border-bottom: 1px solid #f5f5f5;
+  box-shadow: 0 0 4px 1px #aaa;
+  & + .section-box{
+    margin-top: 30px;
+  }
+  pre{
+      max-height: 100px;
+    overflow-y: scroll;
+}
+}
+
 </style>
