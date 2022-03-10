@@ -583,7 +583,7 @@ this.importFormDataModal(str)
                      attr: { filterable: true, clearable: true }
                 },\n`
         } else if (item.type == 'time'||item.type=='dateLimit') {
-          str += `{ valueKey: ['${item.search.combination.key1}', '${item.search.combination.key2}'], value: ['', ''], name: '${item.search.label||item.label}', type: 'dateLimit', attr: { islimitlength: true, dataNotLimit: ${item.type=='dateLimit'},  longtime: longQueryTime(1, 'year') }},\n`
+          str += `{ valueKey: ['${item.search.combination.key1}', '${item.search.combination.key2}'], value: ['', ''], name: '${item.search.label||item.label}', type: 'dateLimit', attr: { islimitlength: true,isAutoAddTime: true, dataNotLimit: ${item.type=='dateLimit'},  longtime: longQueryTime(1, 'year') }},\n`
         } else {
           str += `{
                     name: '${item.search.label||item.label}',
@@ -614,7 +614,7 @@ this.importFormDataModal(str)
                             selectList: ${item.list.data || '[]'},
                       },\n`
                       }else if(item.type=='dateLimit'||item.type=='time'){
-                       str += `{ valueKey: ['${item.dialog.combination.key1}', '${item.dialog.combination.key2}'], value: ['', ''], name: '${item.dialog.label||item.label}', type: 'dateLimit', attr: { islimitlength: true,dataNotLimit: ${item.type=='dateLimit'}, longtime: longQueryTime(1, 'year') }},\n`
+                       str += `{ valueKey: ['${item.dialog.combination.key1}', '${item.dialog.combination.key2}'], value: ['', ''], name: '${item.dialog.label||item.label}', type: 'dateLimit', attr: { islimitlength: true,isAutoAddTime: true,dataNotLimit: ${item.type=='dateLimit'}, longtime: longQueryTime(1, 'year') }},\n`
                       }else{
                         str +=` {
                         valueKey: '${item.dialog.key||item.key}',
