@@ -33,6 +33,13 @@ export default {
       component: () => import('@/views/tool/formPage'),
       name: 'toolHtmlFormPage',
       meta: { title: '表单自动生成' }
-    }
+    },
+    {
+      path: 'string2json',
+      component: () => import('@/views/tool/string2json'),
+      name: 'toolString2json',
+      meta: { title: '表格ToMock' }
+    },
+    
   ]
 }
