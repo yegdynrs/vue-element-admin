@@ -150,6 +150,15 @@ export const asyncRoutes = [
           title: 'DemoIndex',
           roles: ['admin'] // or you can only set roles in sub nav
         }
+      },
+      {
+        path: 'lottie',
+        component: () => import('@/views/demo/lottie'),
+        name: 'LottieIndex',
+        meta: {
+          title: 'LottieIndex',
+          roles: ['admin'] // or you can only set roles in sub nav
+        }
       }
     ]
   },

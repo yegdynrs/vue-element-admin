@@ -162,7 +162,8 @@ ${mockStr}
            ${mockStr}
         })`);
       }
-      console.log(mockData);
+
+      console.log(mockData, JSON.stringify(mockData));
     },
     getMockItemEnum(item, type) {
       // 生成的时候生成的
@@ -388,7 +389,7 @@ ${mockStr}
             json.must = /(是)|(YES)|(yes)|(y)/.test(v[mustIndex]) ? "Y" : "N";
           }
           if (v[descIndex]) {
-            let enums = this.getEnum(v[descIndex]);
+            let enums = this.getEnum(v[descIndex],json);
             if (enums.length) {
               json.type = "select";
               json.selectList = enums;
@@ -408,7 +409,15 @@ ${mockStr}
         }
         return json;
       });
-      console.log(list);
+      let xxxx = list.map(v=>{
+        return {
+          name: v.name,
+          valueKey: v.valueKey,
+          selectList: v.selectList
+        }
+      })
+      console.log(list, JSON.stringify(list));
+      console.log(JSON.stringify(xxxx))
       this.valueList = list;
     },
     getType(item, list) {
@@ -452,7 +461,7 @@ ${mockStr}
         return "array";
       }
     },
-    getEnum(str) {
+    getEnum(str,json) {
       if (!str) {
         return [];
       }
@@ -569,8 +578,12 @@ ${mockStr}
       codeIndex = Math.abs(~-descIndex);
 
       return arrs.map(v => {
+        let code =  v[codeIndex]
+        if(['int','number','integer','float','double'].includes(json.valueType.toLocaleLowerCase&&json.valueType.toLocaleLowerCase())){
+          code = Number(code)
+        }
         return {
-          code: v[codeIndex],
+          code: code,
           desc: v[descIndex]
         };
       });
